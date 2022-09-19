@@ -15,3 +15,8 @@
       desc: run migration down
       cmds:
         - migrate -path migrations -database "mysql://root:root_secret@tcp(localhost:3306)/llg_backend" -verbose down
+
+    sqlc:
+      desc: generate code from sql with sqlc
+      cmds:
+        - sqlc generate
