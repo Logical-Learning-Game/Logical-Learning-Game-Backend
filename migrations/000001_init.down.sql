@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS player;
+
+DROP TABLE IF EXISTS login_log;
