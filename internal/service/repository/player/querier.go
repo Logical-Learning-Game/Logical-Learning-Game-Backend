@@ -9,7 +9,8 @@ import (
 )
 
 type Querier interface {
-	CreatePlayer(ctx context.Context, arg CreatePlayerParams) error
+	CreateLoginLog(ctx context.Context, playerID string) error
+	CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error
 }
 
 var _ Querier = (*Queries)(nil)

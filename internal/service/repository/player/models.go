@@ -14,6 +14,6 @@ type LoginLog struct {
 }
 
 type Player struct {
-	PlayerID string `json:"player_id"`
-	Email    string `json:"email"`
+	PlayerID string         `json:"player_id"`
+	Email    sql.NullString `json:"email"`
 }

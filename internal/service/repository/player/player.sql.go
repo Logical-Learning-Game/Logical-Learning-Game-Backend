@@ -7,19 +7,31 @@ package player
 
 import (
 	"context"
+	"database/sql"
 )
 
-const createPlayer = `-- name: CreatePlayer :exec
-INSERT INTO player (player_id, email)
-VALUES (?, ?)
+const createLoginLog = `-- name: CreateLoginLog :exec
+INSERT INTO login_log (player_id)
+VALUES (?)
 `
 
-type CreatePlayerParams struct {
-	PlayerID string `json:"player_id"`
-	Email    string `json:"email"`
+func (q *Queries) CreateLoginLog(ctx context.Context, playerID string) error {
+	_, err := q.db.ExecContext(ctx, createLoginLog, playerID)
+	return err
 }
 
-func (q *Queries) CreatePlayer(ctx context.Context, arg CreatePlayerParams) error {
-	_, err := q.db.ExecContext(ctx, createPlayer, arg.PlayerID, arg.Email)
+const createOrUpdatePlayer = `-- name: CreateOrUpdatePlayer :exec
+INSERT INTO player (player_id, email)
+VALUES (?, ?)
+ON DUPLICATE KEY UPDATE email = ?
+`
+
+type CreateOrUpdatePlayerParams struct {
+	PlayerID string         `json:"player_id"`
+	Email    sql.NullString `json:"email"`
+}
+
+func (q *Queries) CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error {
+	_, err := q.db.ExecContext(ctx, createOrUpdatePlayer, arg.PlayerID, arg.Email, arg.Email)
 	return err
 }
