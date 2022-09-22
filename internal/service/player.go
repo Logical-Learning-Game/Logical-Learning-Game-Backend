@@ -4,6 +4,7 @@ import (
 	"context"
 	"llg_backend/internal/service/repository/player"
 	"llg_backend/pkg/logger"
+	"strings"
 )
 
 type PlayerService interface {
@@ -43,11 +44,15 @@ func NewPlayerServiceWithLog(playerService PlayerService, log logger.Logger) Pla
 }
 
 func (s *playerServiceWithLog) CreateLoginLog(ctx context.Context, playerID string) error {
-	s.log.Debugw("CreateLoginLog - param", "playerID", playerID)
+	sanitizedPlayerID := strings.Replace(playerID, "\n", "", -1)
+	sanitizedPlayerID = strings.Replace(sanitizedPlayerID, "\r", "", -1)
+	s.log.Debugw("CreateLoginLog - param", "playerID", sanitizedPlayerID)
+
 	err := s.PlayerService.CreateLoginLog(ctx, playerID)
 	if err != nil {
 		s.log.Errorw("CreateLoginLog error", "err", err)
 	}
+
 	s.log.Debugw("CreateLoginLog - return", "err", err)
 	return err
 }
