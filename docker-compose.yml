@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  mariadb:
+    image: mariadb:10.10.1-rc
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MARIADB_USER=chuckboliver
+      - MARIADB_PASSWORD=secret
+      - MARIADB_ROOT_PASSWORD=root_secret
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      - MODE=development
+      - SERVER_PORT=8080
+      - DB_SOURCE=root:root_secret@tcp(mariadb:3306)/llg_backend
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb-data:
