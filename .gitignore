@@ -170,4 +170,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,goland,go
 
 # Secrets
-app.env
+*.env
+.envrc

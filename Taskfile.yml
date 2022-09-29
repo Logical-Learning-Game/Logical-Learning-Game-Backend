@@ -1,8 +1,5 @@
 version: '3'
 
-dotenv:
-  - app.env
-
 vars:
   DB_SOURCE_URI: mysql://{{ .DB_SOURCE }}
 
@@ -26,8 +23,3 @@ tasks:
     desc: generate code from sql with sqlc
     cmds:
       - sqlc generate
-
-  loadenv:
-    desc: load environment variables into shell from FILE variable
-    cmds:
-      - . {{ .FILE }}
