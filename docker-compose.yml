@@ -6,10 +6,8 @@ services:
     restart: always
     ports:
       - "3306:3306"
-    environment:
-      - MARIADB_USER=chuckboliver
-      - MARIADB_PASSWORD=secret
-      - MARIADB_ROOT_PASSWORD=root_secret
+    env_file:
+      - app.env
     volumes:
       - mariadb-data:/var/lib/mysql
 
@@ -17,12 +15,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - app.env
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
-    environment:
-      - MODE=development
-      - SERVER_PORT=8080
-      - DB_SOURCE=root:root_secret@tcp(mariadb:3306)/llg_backend
     depends_on:
       - mariadb
 

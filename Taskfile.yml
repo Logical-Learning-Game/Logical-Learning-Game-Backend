@@ -1,22 +1,33 @@
-  version: '3'
+version: '3'
 
-  tasks:
-    server:
-      desc: run server
-      cmds:
-        - go run cmd/app/main.go
+dotenv:
+  - app.env
 
-    migrateup:
-      desc: run migration up
-      cmds:
-        - migrate -path migrations -database "mysql://root:root_secret@tcp(localhost:3306)/llg_backend" -verbose up
+vars:
+  DB_SOURCE_URI: mysql://{{ .DB_SOURCE }}
 
-    migratedown:
-      desc: run migration down
-      cmds:
-        - migrate -path migrations -database "mysql://root:root_secret@tcp(localhost:3306)/llg_backend" -verbose down
+tasks:
+  server:
+    desc: run server
+    cmds:
+      - go run cmd/app/main.go
 
-    sqlc:
-      desc: generate code from sql with sqlc
-      cmds:
-        - sqlc generate
+  migrateup:
+    desc: run migration up
+    cmds:
+      - migrate -path migrations -database {{ .DB_SOURCE_URI }} -verbose up
+
+  migratedown:
+    desc: run migration down
+    cmds:
+      - migrate -path migrations -database {{ .DB_SOURCE_URI }} -verbose down
+
+  sqlc:
+    desc: generate code from sql with sqlc
+    cmds:
+      - sqlc generate
+
+  loadenv:
+    desc: load environment variables into shell from FILE variable
+    cmds:
+      - . {{ .FILE }}
