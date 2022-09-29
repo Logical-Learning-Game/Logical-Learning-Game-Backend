@@ -4,10 +4,10 @@ services:
   mariadb:
     image: mariadb:10.10.1-rc
     restart: always
+    env_file:
+      - mariadb.env
     ports:
       - "3306:3306"
-    env_file:
-      - app.env
     volumes:
       - mariadb-data:/var/lib/mysql
 
@@ -15,12 +15,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - app.env
+    restart: always
+    environment:
+      - DB_SOURCE=root:root_secret@tcp(mariadb:3306)/llg_backend
+      - SERVER_PORT
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:
       - mariadb
+    command:
+      - ./wait-for
+      - mariadb:3306
+      - --
+      - ./start.sh
+      - ./main
 
 volumes:
   mariadb-data:
