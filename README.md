@@ -12,3 +12,4 @@
 - Taskfile
 - Docker
 - Docker Compose
+- direnv
