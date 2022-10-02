@@ -7,3 +7,8 @@
 
 ## DevOps
 - Github
+
+## Other
+- Taskfile
+- Docker
+- Docker Compose
