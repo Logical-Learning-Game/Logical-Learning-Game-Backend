@@ -21,17 +21,25 @@ func (q *Queries) CreateLoginLog(ctx context.Context, playerID string) error {
 }
 
 const createOrUpdatePlayer = `-- name: CreateOrUpdatePlayer :exec
-INSERT INTO player (player_id, email)
-VALUES (?, ?)
-ON DUPLICATE KEY UPDATE email = ?
+INSERT INTO player (player_id, email, name)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE email = ?,
+                        name  = ?
 `
 
 type CreateOrUpdatePlayerParams struct {
 	PlayerID string         `json:"player_id"`
 	Email    sql.NullString `json:"email"`
+	Name     sql.NullString `json:"name"`
 }
 
 func (q *Queries) CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error {
-	_, err := q.db.ExecContext(ctx, createOrUpdatePlayer, arg.PlayerID, arg.Email, arg.Email)
+	_, err := q.db.ExecContext(ctx, createOrUpdatePlayer,
+		arg.PlayerID,
+		arg.Email,
+		arg.Name,
+		arg.Email,
+		arg.Name,
+	)
 	return err
 }

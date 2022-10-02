@@ -9,11 +9,12 @@ import (
 )
 
 type LoginLog struct {
-	PlayerID  string       `json:"player_id"`
-	CreatedAt sql.NullTime `json:"created_at"`
+	PlayerID string       `json:"player_id"`
+	LoginAt  sql.NullTime `json:"login_at"`
 }
 
 type Player struct {
 	PlayerID string         `json:"player_id"`
 	Email    sql.NullString `json:"email"`
+	Name     sql.NullString `json:"name"`
 }
