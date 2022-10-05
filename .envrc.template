@@ -1,0 +1,5 @@
+# HTTP
+export SERVER_PORT={portnumber}
+
+# MariaDB
+export DB_SOURCE={username}:{password}@tcp({host}:{port})/{database}

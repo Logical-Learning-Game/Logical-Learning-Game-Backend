@@ -27,6 +27,7 @@ func newPlayerController(handler *gin.RouterGroup, playerService service.PlayerS
 type createLoginLogRequest struct {
 	PlayerID string `json:"player_id"`
 	Email    string `json:"email"`
+	Name     string `json:"name"`
 }
 
 func (c *playerController) CreateLoginLog(ctx *gin.Context) {
@@ -42,6 +43,10 @@ func (c *playerController) CreateLoginLog(ctx *gin.Context) {
 		Email: sql.NullString{
 			String: req.Email,
 			Valid:  req.Email != "",
+		},
+		Name: sql.NullString{
+			String: req.Name,
+			Valid:  req.Name != "",
 		},
 	}
 	if err := c.playerService.CreateOrUpdatePlayer(ctx, arg); err != nil {

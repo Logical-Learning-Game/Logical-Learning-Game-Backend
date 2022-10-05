@@ -12,6 +12,12 @@ func New(url string) (*sql.DB, error) {
 	conn, err := sql.Open("mysql", url)
 	if err != nil {
 		logger.GlobalLog.Debugw("connect to mariadb failed", "err", err)
+		return nil, err
+	}
+
+	if err := conn.Ping(); err != nil {
+		logger.GlobalLog.Debugw("connect to mariadb failed", "err", err)
+		return nil, err
 	}
 
 	logger.GlobalLog.Info("connect to mariadb successful")
