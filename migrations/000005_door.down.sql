@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS door;
+DROP TYPE IF EXISTS door_type;

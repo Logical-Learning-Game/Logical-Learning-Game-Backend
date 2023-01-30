@@ -6,16 +6,438 @@ package entity
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
+
+type CommandEdgeType string
+
+const (
+	CommandEdgeTypeConditionalBranch CommandEdgeType = "conditional_branch"
+	CommandEdgeTypeMainBranch        CommandEdgeType = "main_branch"
+)
+
+func (e *CommandEdgeType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CommandEdgeType(s)
+	case string:
+		*e = CommandEdgeType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CommandEdgeType: %T", src)
+	}
+	return nil
+}
+
+type NullCommandEdgeType struct {
+	CommandEdgeType CommandEdgeType
+	Valid           bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCommandEdgeType) Scan(value interface{}) error {
+	if value == nil {
+		ns.CommandEdgeType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CommandEdgeType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCommandEdgeType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.CommandEdgeType, nil
+}
+
+type CommandNodeType string
+
+const (
+	CommandNodeTypeConditionalA CommandNodeType = "conditional_a"
+	CommandNodeTypeConditionalB CommandNodeType = "conditional_b"
+	CommandNodeTypeConditionalC CommandNodeType = "conditional_c"
+	CommandNodeTypeConditionalD CommandNodeType = "conditional_d"
+	CommandNodeTypeConditionalE CommandNodeType = "conditional_e"
+	CommandNodeTypeUp           CommandNodeType = "up"
+	CommandNodeTypeLeft         CommandNodeType = "left"
+	CommandNodeTypeDown         CommandNodeType = "down"
+	CommandNodeTypeRight        CommandNodeType = "right"
+)
+
+func (e *CommandNodeType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CommandNodeType(s)
+	case string:
+		*e = CommandNodeType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CommandNodeType: %T", src)
+	}
+	return nil
+}
+
+type NullCommandNodeType struct {
+	CommandNodeType CommandNodeType
+	Valid           bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCommandNodeType) Scan(value interface{}) error {
+	if value == nil {
+		ns.CommandNodeType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CommandNodeType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCommandNodeType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.CommandNodeType, nil
+}
+
+type DoorType string
+
+const (
+	DoorTypeDoorNoKey DoorType = "door_no_key"
+	DoorTypeDoorA     DoorType = "door_a"
+	DoorTypeDoorB     DoorType = "door_b"
+	DoorTypeDoorC     DoorType = "door_c"
+)
+
+func (e *DoorType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DoorType(s)
+	case string:
+		*e = DoorType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DoorType: %T", src)
+	}
+	return nil
+}
+
+type NullDoorType struct {
+	DoorType DoorType
+	Valid    bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDoorType) Scan(value interface{}) error {
+	if value == nil {
+		ns.DoorType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DoorType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDoorType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.DoorType, nil
+}
+
+type ItemType string
+
+const (
+	ItemTypeKeyA ItemType = "key_a"
+	ItemTypeKeyB ItemType = "key_b"
+	ItemTypeKeyC ItemType = "key_c"
+)
+
+func (e *ItemType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ItemType(s)
+	case string:
+		*e = ItemType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ItemType: %T", src)
+	}
+	return nil
+}
+
+type NullItemType struct {
+	ItemType ItemType
+	Valid    bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullItemType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ItemType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ItemType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullItemType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.ItemType, nil
+}
+
+type MapDifficulty string
+
+const (
+	MapDifficultyEasy   MapDifficulty = "easy"
+	MapDifficultyMedium MapDifficulty = "medium"
+	MapDifficultyHard   MapDifficulty = "hard"
+)
+
+func (e *MapDifficulty) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = MapDifficulty(s)
+	case string:
+		*e = MapDifficulty(s)
+	default:
+		return fmt.Errorf("unsupported scan type for MapDifficulty: %T", src)
+	}
+	return nil
+}
+
+type NullMapDifficulty struct {
+	MapDifficulty MapDifficulty
+	Valid         bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullMapDifficulty) Scan(value interface{}) error {
+	if value == nil {
+		ns.MapDifficulty, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.MapDifficulty.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullMapDifficulty) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.MapDifficulty, nil
+}
+
+type MapDirection string
+
+const (
+	MapDirectionUp    MapDirection = "up"
+	MapDirectionLeft  MapDirection = "left"
+	MapDirectionDown  MapDirection = "down"
+	MapDirectionRight MapDirection = "right"
+)
+
+func (e *MapDirection) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = MapDirection(s)
+	case string:
+		*e = MapDirection(s)
+	default:
+		return fmt.Errorf("unsupported scan type for MapDirection: %T", src)
+	}
+	return nil
+}
+
+type NullMapDirection struct {
+	MapDirection MapDirection
+	Valid        bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullMapDirection) Scan(value interface{}) error {
+	if value == nil {
+		ns.MapDirection, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.MapDirection.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullMapDirection) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.MapDirection, nil
+}
+
+type RuleTheme string
+
+const (
+	RuleThemeNormal      RuleTheme = "normal"
+	RuleThemeConditional RuleTheme = "conditional"
+	RuleThemeLoop        RuleTheme = "loop"
+)
+
+func (e *RuleTheme) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RuleTheme(s)
+	case string:
+		*e = RuleTheme(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RuleTheme: %T", src)
+	}
+	return nil
+}
+
+type NullRuleTheme struct {
+	RuleTheme RuleTheme
+	Valid     bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRuleTheme) Scan(value interface{}) error {
+	if value == nil {
+		ns.RuleTheme, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RuleTheme.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRuleTheme) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.RuleTheme, nil
+}
+
+type CommandEdge struct {
+	SourceNodeID      int64           `json:"source_node_id"`
+	DestinationNodeID int64           `json:"destination_node_id"`
+	Type              CommandEdgeType `json:"type"`
+}
+
+type CommandNode struct {
+	ID              int64           `json:"id"`
+	PlayHistoryID   int64           `json:"play_history_id"`
+	Type            CommandNodeType `json:"type"`
+	InGamePositionX float32         `json:"in_game_position_x"`
+	InGamePositionY float32         `json:"in_game_position_y"`
+}
+
+type Door struct {
+	ID     int64    `json:"id"`
+	Name   string   `json:"name"`
+	Active bool     `json:"active"`
+	Type   DoorType `json:"type"`
+}
+
+type GameSession struct {
+	ID                 int64        `json:"id"`
+	PlayerID           string       `json:"player_id"`
+	MapConfigurationID int64        `json:"map_configuration_id"`
+	StartDatetime      time.Time    `json:"start_datetime"`
+	EndDatetime        sql.NullTime `json:"end_datetime"`
+}
+
+type Item struct {
+	ID     int64    `json:"id"`
+	Name   string   `json:"name"`
+	Active bool     `json:"active"`
+	Type   ItemType `json:"type"`
+}
 
 type LoginLog struct {
 	PlayerID string    `json:"player_id"`
 	LoginAt  time.Time `json:"login_at"`
 }
 
+type Map struct {
+	ID                   int64        `json:"id"`
+	TileArray            []int32      `json:"tile_array"`
+	Height               int32        `json:"height"`
+	Width                int32        `json:"width"`
+	StartPlayerDirection MapDirection `json:"start_player_direction"`
+}
+
+type MapConfiguration struct {
+	ID                         int64          `json:"id"`
+	WorldID                    int64          `json:"world_id"`
+	MapID                      int64          `json:"map_id"`
+	ConfigName                 string         `json:"config_name"`
+	MapImagePath               sql.NullString `json:"map_image_path"`
+	Difficulty                 MapDifficulty  `json:"difficulty"`
+	StarRequirement            int32          `json:"star_requirement"`
+	LeastSolvableCommandGold   int32          `json:"least_solvable_command_gold"`
+	LeastSolvableCommandSilver int32          `json:"least_solvable_command_silver"`
+	LeastSolvableCommandBronze int32          `json:"least_solvable_command_bronze"`
+	LeastSolvableActionGold    int32          `json:"least_solvable_action_gold"`
+	LeastSolvableActionSilver  int32          `json:"least_solvable_action_silver"`
+	LeastSolvableActionBronze  int32          `json:"least_solvable_action_bronze"`
+	CreatedAt                  time.Time      `json:"created_at"`
+}
+
+type MapConfigurationDoor struct {
+	ID                 int64        `json:"id"`
+	MapConfigurationID int64        `json:"map_configuration_id"`
+	DoorID             int64        `json:"door_id"`
+	PositionX          int32        `json:"position_x"`
+	PositionY          int32        `json:"position_y"`
+	DoorDirection      MapDirection `json:"door_direction"`
+}
+
+type MapConfigurationForPlayer struct {
+	ID                 int64  `json:"id"`
+	MapConfigurationID int64  `json:"map_configuration_id"`
+	PlayerID           string `json:"player_id"`
+	IsPass             bool   `json:"is_pass"`
+}
+
+type MapConfigurationItem struct {
+	ID                 int64 `json:"id"`
+	MapConfigurationID int64 `json:"map_configuration_id"`
+	ItemID             int64 `json:"item_id"`
+	PositionX          int32 `json:"position_x"`
+	PositionY          int32 `json:"position_y"`
+}
+
+type MapConfigurationRule struct {
+	MapConfigurationID int64         `json:"map_configuration_id"`
+	Rule               string        `json:"rule"`
+	Parameters         sql.NullInt32 `json:"parameters"`
+}
+
+type PlayHistory struct {
+	ID              int64     `json:"id"`
+	GameSessionID   int64     `json:"game_session_id"`
+	ActionStep      int32     `json:"action_step"`
+	NumberOfCommand int32     `json:"number_of_command"`
+	IsFinited       bool      `json:"is_finited"`
+	IsCompleted     bool      `json:"is_completed"`
+	SubmitDatetime  time.Time `json:"submit_datetime"`
+}
+
 type Player struct {
 	PlayerID string         `json:"player_id"`
 	Email    sql.NullString `json:"email"`
 	Name     sql.NullString `json:"name"`
+}
+
+type Rule struct {
+	Name        string         `json:"name"`
+	Theme       RuleTheme      `json:"theme"`
+	Description sql.NullString `json:"description"`
+}
+
+type World struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
 }
