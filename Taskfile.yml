@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  DB_SOURCE_URI: mysql://{{ .DB_SOURCE }}
+  POSTGRES_URI: "{{ .POSTGRES_URI }}"
 
 tasks:
   server:
@@ -12,12 +12,12 @@ tasks:
   migrateup:
     desc: run migration up
     cmds:
-      - migrate -path migrations -database {{ .DB_SOURCE_URI }} -verbose up
+      - migrate -path migrations -database {{ .POSTGRES_URI }} -verbose up
 
   migratedown:
     desc: run migration down
     cmds:
-      - migrate -path migrations -database {{ .DB_SOURCE_URI }} -verbose down
+      - migrate -path migrations -database {{ .POSTGRES_URI }} -verbose down
 
   sqlc:
     desc: generate code from sql with sqlc

@@ -3,28 +3,20 @@
 //   sqlc v1.15.0
 // source: player.sql
 
-package player
+package entity
 
 import (
 	"context"
 	"database/sql"
 )
 
-const createLoginLog = `-- name: CreateLoginLog :exec
-INSERT INTO login_log (player_id)
-VALUES (?)
-`
-
-func (q *Queries) CreateLoginLog(ctx context.Context, playerID string) error {
-	_, err := q.db.ExecContext(ctx, createLoginLog, playerID)
-	return err
-}
-
 const createOrUpdatePlayer = `-- name: CreateOrUpdatePlayer :exec
 INSERT INTO player (player_id, email, name)
-VALUES (?, ?, ?)
-ON DUPLICATE KEY UPDATE email = ?,
-                        name  = ?
+VALUES ($1, $2, $3)
+ON CONFLICT (player_id)
+    DO UPDATE SET
+    email = $2,
+    name = $3
 `
 
 type CreateOrUpdatePlayerParams struct {
@@ -34,12 +26,6 @@ type CreateOrUpdatePlayerParams struct {
 }
 
 func (q *Queries) CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error {
-	_, err := q.db.ExecContext(ctx, createOrUpdatePlayer,
-		arg.PlayerID,
-		arg.Email,
-		arg.Name,
-		arg.Email,
-		arg.Name,
-	)
+	_, err := q.db.ExecContext(ctx, createOrUpdatePlayer, arg.PlayerID, arg.Email, arg.Name)
 	return err
 }

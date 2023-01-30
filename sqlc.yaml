@@ -1,13 +1,17 @@
 version: "2"
 
 sql:
-  - schema: "migrations/000001_init.up.sql"
-    queries: "internal/service/query/player.sql"
-    engine: "mysql"
+  - schema:
+      - "migrations/000001_player.up.sql"
+      - "migrations/000002_login_log.up.sql"
+    queries:
+      - "query/player.sql"
+      - "query/login_log.sql"
+    engine: "postgresql"
     gen:
       go:
-        package: "player"
-        out: "internal/service/repository/player"
+        package: "entity"
+        out: "internal/entity"
         emit_interface: true
         emit_empty_slices: true
         emit_json_tags: true

@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"database/sql"
+	"llg_backend/internal/pkg/httputil"
 	"llg_backend/internal/service"
-	"llg_backend/internal/service/repository/player"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,28 +33,17 @@ func (c *playerController) CreateLoginLog(ctx *gin.Context) {
 	var req createLoginLogRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
 	}
 
-	arg := player.CreateOrUpdatePlayerParams{
-		PlayerID: req.PlayerID,
-		Email: sql.NullString{
-			String: req.Email,
-			Valid:  req.Email != "",
-		},
-		Name: sql.NullString{
-			String: req.Name,
-			Valid:  req.Name != "",
-		},
-	}
-	if err := c.playerService.CreateOrUpdatePlayer(ctx, arg); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errorResponse(err))
+	if err := c.playerService.CreateOrUpdatePlayerInformation(ctx, req.PlayerID, req.Email, req.Name); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 
 	if err := c.playerService.CreateLoginLog(ctx, req.PlayerID); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 

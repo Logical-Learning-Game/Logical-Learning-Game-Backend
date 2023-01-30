@@ -2,15 +2,16 @@
 // versions:
 //   sqlc v1.15.0
 
-package player
+package entity
 
 import (
 	"database/sql"
+	"time"
 )
 
 type LoginLog struct {
-	PlayerID string       `json:"player_id"`
-	LoginAt  sql.NullTime `json:"login_at"`
+	PlayerID string    `json:"player_id"`
+	LoginAt  time.Time `json:"login_at"`
 }
 
 type Player struct {

@@ -2,28 +2,23 @@ package service
 
 import (
 	"context"
-	"llg_backend/internal/service/repository/player"
+	"llg_backend/internal/repository"
 	"llg_backend/pkg/logger"
 	"strings"
 )
 
-type PlayerService interface {
-	CreateOrUpdatePlayer(ctx context.Context, arg player.CreateOrUpdatePlayerParams) error
-	CreateLoginLog(ctx context.Context, playerID string) error
-}
-
 type playerService struct {
-	playerRepo player.Querier
+	playerRepo repository.PlayerRepository
 }
 
-func NewPlayerService(playerRepo player.Querier) PlayerService {
+func NewPlayerService(playerRepo repository.PlayerRepository) PlayerService {
 	return &playerService{
 		playerRepo: playerRepo,
 	}
 }
 
-func (s *playerService) CreateOrUpdatePlayer(ctx context.Context, arg player.CreateOrUpdatePlayerParams) error {
-	return s.playerRepo.CreateOrUpdatePlayer(ctx, arg)
+func (s *playerService) CreateOrUpdatePlayerInformation(ctx context.Context, playerID, email, name string) error {
+	return s.playerRepo.CreateOrUpdatePlayer(ctx, playerID, email, name)
 }
 
 func (s *playerService) CreateLoginLog(ctx context.Context, playerID string) error {

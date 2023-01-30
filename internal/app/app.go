@@ -3,11 +3,12 @@ package app
 import (
 	"llg_backend/config"
 	v1 "llg_backend/internal/controller/http/v1"
+	"llg_backend/internal/entity"
+	"llg_backend/internal/pkg/postgres"
+	"llg_backend/internal/repository"
 	"llg_backend/internal/service"
-	"llg_backend/internal/service/repository/player"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
-	"llg_backend/pkg/mariadb"
 	"log"
 	"os"
 	"os/signal"
@@ -26,17 +27,20 @@ func Run(cfg *config.Config) {
 
 	sugar := l.Sugar()
 	zapLogger := logger.NewZapLogger(sugar)
-	logger.SetGlobalLogger(zapLogger)
+
+	globalLogger := l.Sugar()
+	zapGlobalLogger := logger.NewZapLogger(globalLogger)
+	logger.SetGlobalLogger(zapGlobalLogger)
 
 	handler := gin.New()
 
-	conn, err := mariadb.New(cfg.MariaDB.DBSource)
+	conn, err := postgres.New(cfg.Postgres.URI)
 	if err != nil {
-		zapLogger.Fatalw("connect to mariadb failed", "err", err)
+		zapLogger.Fatalw("cannot connect to postgres, exiting program", "err", err)
 	}
-	defer conn.Close()
 
-	playerRepo := player.New(conn)
+	postgresQuery := entity.New(conn)
+	playerRepo := repository.NewPlayerRepository(postgresQuery)
 	playerService := service.NewPlayerService(playerRepo)
 	playerServiceWithLog := service.NewPlayerServiceWithLog(playerService, zapLogger)
 

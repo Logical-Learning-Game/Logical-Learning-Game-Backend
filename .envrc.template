@@ -1,5 +1,8 @@
 # HTTP
 export SERVER_PORT={portnumber}
 
-# MariaDB
-export DB_SOURCE={username}:{password}@tcp({host}:{port})/{database}
+# Postgres
+export POSTGRES_URI={uri}
+
+# Google API
+export CLIENT_ID={clientID}
