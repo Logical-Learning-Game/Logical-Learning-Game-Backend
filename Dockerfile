@@ -11,9 +11,9 @@ COPY --from=builder /app/migrate /usr/local/bin
 COPY --from=builder /app/wait-for .
 RUN chmod +x wait-for
 COPY migrations ./migrations
-COPY migrate.sh .
+COPY scripts/migrate.sh .
 RUN chmod +x migrate.sh
-COPY start.sh .
+COPY scripts/start.sh .
 RUN chmod +x start.sh
 RUN apk add findutils
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
