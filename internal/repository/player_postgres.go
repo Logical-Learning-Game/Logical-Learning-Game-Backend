@@ -3,21 +3,21 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"llg_backend/internal/entity"
+	"llg_backend/internal/entity/sqlc_generated"
 	"strings"
 )
 
 type playerRepository struct {
-	entity.Querier
+	sqlc_generated.Querier
 }
 
-func NewPlayerRepository(querier entity.Querier) PlayerRepository {
+func NewPlayerRepository(querier sqlc_generated.Querier) PlayerRepository {
 	return &playerRepository{
 		Querier: querier,
 	}
 }
 
-func (p playerRepository) CreateOrUpdatePlayer(ctx context.Context, playerID, email, name string) error {
+func (p *playerRepository) CreateOrUpdatePlayer(ctx context.Context, playerID, email, name string) error {
 	emailArg := sql.NullString{
 		String: email,
 		Valid:  true,
@@ -37,8 +37,8 @@ func (p playerRepository) CreateOrUpdatePlayer(ctx context.Context, playerID, em
 	if trimmedSpaceName == "" {
 		nameArg.Valid = false
 	}
-	
-	arg := entity.CreateOrUpdatePlayerParams{
+
+	arg := sqlc_generated.CreateOrUpdatePlayerParams{
 		PlayerID: playerID,
 		Email:    emailArg,
 		Name:     nameArg,

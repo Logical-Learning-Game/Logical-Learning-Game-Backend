@@ -41,10 +41,18 @@ func Run(cfg *config.Config) {
 
 	postgresQuery := sqlc_generated.New(conn)
 	playerRepo := repository.NewPlayerRepository(postgresQuery)
+	mapConfigRepo := repository.NewMapConfigurationRepository(postgresQuery)
+	itemRepo := repository.NewItemRepository(postgresQuery)
+	doorRepo := repository.NewDoorRepository(postgresQuery)
+	worldRepo := repository.NewWorldRepository(postgresQuery)
+	ruleRepo := repository.NewRuleRepository(postgresQuery)
+
 	playerService := service.NewPlayerService(playerRepo)
+	mapConfigService := service.NewMapConfigurationService(mapConfigRepo, itemRepo, doorRepo, ruleRepo)
+	worldService := service.NewWorldService(mapConfigService, worldRepo)
 	playerServiceWithLog := service.NewPlayerServiceWithLog(playerService, zapLogger)
 
-	v1.NewRouter(handler, cfg, playerServiceWithLog)
+	v1.NewRouter(handler, cfg, playerServiceWithLog, worldService)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 	httpServer.Start()

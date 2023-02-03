@@ -10,16 +10,22 @@ import (
 
 type playerController struct {
 	playerService service.PlayerService
+	worldService  service.WorldService
 }
 
-func newPlayerController(handler *gin.RouterGroup, playerService service.PlayerService) {
+func newPlayerController(handler *gin.RouterGroup, playerService service.PlayerService, worldService service.WorldService) {
 	controller := playerController{
 		playerService: playerService,
+		worldService:  worldService,
 	}
 
 	h := handler.Group("/player")
 	{
 		h.POST("/login_log", controller.CreateLoginLog)
+		playerGroup := h.Group("/:playerID")
+		{
+			playerGroup.GET("/available_maps", controller.ListAvailableMaps)
+		}
 	}
 }
 
@@ -48,4 +54,15 @@ func (c *playerController) CreateLoginLog(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+func (c *playerController) ListAvailableMaps(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	playerWorlds, err := c.worldService.ListFromPlayerID(ctx, playerID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+	}
+
+	ctx.JSON(http.StatusOK, playerWorlds)
 }
