@@ -3,7 +3,7 @@ package app
 import (
 	"llg_backend/config"
 	v1 "llg_backend/internal/controller/http/v1"
-	"llg_backend/internal/entity"
+	"llg_backend/internal/entity/sqlc_generated"
 	"llg_backend/internal/pkg/postgres"
 	"llg_backend/internal/repository"
 	"llg_backend/internal/service"
@@ -39,7 +39,7 @@ func Run(cfg *config.Config) {
 		zapLogger.Fatalw("cannot connect to postgres, exiting program", "err", err)
 	}
 
-	postgresQuery := entity.New(conn)
+	postgresQuery := sqlc_generated.New(conn)
 	playerRepo := repository.NewPlayerRepository(postgresQuery)
 	playerService := service.NewPlayerService(playerRepo)
 	playerServiceWithLog := service.NewPlayerServiceWithLog(playerService, zapLogger)

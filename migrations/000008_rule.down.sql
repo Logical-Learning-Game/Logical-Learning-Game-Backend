@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS rule;
-DROP TYPE IF EXISTS rule_theme;

@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.15.0
 
-package entity
+package sqlc_generated
 
 import (
 	"database/sql"
@@ -366,6 +366,10 @@ type Map struct {
 	Height               int32        `json:"height"`
 	Width                int32        `json:"width"`
 	StartPlayerDirection MapDirection `json:"start_player_direction"`
+	StartPlayerPositionX int32        `json:"start_player_position_x"`
+	StartPlayerPositionY int32        `json:"start_player_position_y"`
+	GoalPositionX        int32        `json:"goal_position_x"`
+	GoalPositionY        int32        `json:"goal_position_y"`
 }
 
 type MapConfiguration struct {
@@ -410,9 +414,10 @@ type MapConfigurationItem struct {
 }
 
 type MapConfigurationRule struct {
-	MapConfigurationID int64         `json:"map_configuration_id"`
-	Rule               string        `json:"rule"`
-	Parameters         sql.NullInt32 `json:"parameters"`
+	MapConfigurationID int64     `json:"map_configuration_id"`
+	Rule               string    `json:"rule"`
+	Theme              RuleTheme `json:"theme"`
+	Parameters         []int32   `json:"parameters"`
 }
 
 type PlayHistory struct {
@@ -425,6 +430,13 @@ type PlayHistory struct {
 	SubmitDatetime  time.Time `json:"submit_datetime"`
 }
 
+type PlayHistoryRule struct {
+	PlayHistoryID int64  `json:"play_history_id"`
+	Rule          string `json:"rule"`
+	Value         int32  `json:"value"`
+	IsPass        bool   `json:"is_pass"`
+}
+
 type Player struct {
 	PlayerID string         `json:"player_id"`
 	Email    sql.NullString `json:"email"`
@@ -432,9 +444,8 @@ type Player struct {
 }
 
 type Rule struct {
-	Name        string         `json:"name"`
-	Theme       RuleTheme      `json:"theme"`
-	Description sql.NullString `json:"description"`
+	Name   string `json:"name"`
+	Active bool   `json:"active"`
 }
 
 type World struct {

@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS map;
-DROP TYPE IF EXISTS map_direction;

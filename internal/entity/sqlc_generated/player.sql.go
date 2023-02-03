@@ -3,7 +3,7 @@
 //   sqlc v1.15.0
 // source: player.sql
 
-package entity
+package sqlc_generated
 
 import (
 	"context"
