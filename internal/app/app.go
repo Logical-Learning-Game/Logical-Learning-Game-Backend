@@ -5,8 +5,6 @@ import (
 	v1 "llg_backend/internal/controller/http/v1"
 	"llg_backend/internal/entity/sqlc_generated"
 	"llg_backend/internal/pkg/postgres"
-	"llg_backend/internal/repository"
-	"llg_backend/internal/service"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
 	"log"
@@ -40,19 +38,9 @@ func Run(cfg *config.Config) {
 	}
 
 	postgresQuery := sqlc_generated.New(conn)
-	playerRepo := repository.NewPlayerRepository(postgresQuery)
-	mapConfigRepo := repository.NewMapConfigurationRepository(postgresQuery)
-	itemRepo := repository.NewItemRepository(postgresQuery)
-	doorRepo := repository.NewDoorRepository(postgresQuery)
-	worldRepo := repository.NewWorldRepository(postgresQuery)
-	ruleRepo := repository.NewRuleRepository(postgresQuery)
+	playerController := InitializePlayerController(postgresQuery)
 
-	playerService := service.NewPlayerService(playerRepo)
-	mapConfigService := service.NewMapConfigurationService(mapConfigRepo, itemRepo, doorRepo, ruleRepo)
-	worldService := service.NewWorldService(mapConfigService, worldRepo)
-	playerServiceWithLog := service.NewPlayerServiceWithLog(playerService, zapLogger)
-
-	v1.NewRouter(handler, cfg, playerServiceWithLog, worldService)
+	v1.NewRouter(handler, playerController)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 	httpServer.Start()

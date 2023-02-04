@@ -8,23 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type playerController struct {
+type PlayerController struct {
 	playerService service.PlayerService
 	worldService  service.WorldService
 }
 
-func newPlayerController(handler *gin.RouterGroup, playerService service.PlayerService, worldService service.WorldService) {
-	controller := playerController{
+func NewPlayerController(playerService service.PlayerService, worldService service.WorldService) *PlayerController {
+	return &PlayerController{
 		playerService: playerService,
 		worldService:  worldService,
 	}
+}
 
+func (c *PlayerController) initRoutes(handler *gin.RouterGroup) {
 	h := handler.Group("/player")
 	{
-		h.POST("/login_log", controller.CreateLoginLog)
+		h.POST("/login_log", c.CreateLoginLog)
 		playerGroup := h.Group("/:playerID")
 		{
-			playerGroup.GET("/available_maps", controller.ListAvailableMaps)
+			playerGroup.GET("/available_maps", c.ListAvailableMaps)
 		}
 	}
 }
@@ -35,7 +37,7 @@ type createLoginLogRequest struct {
 	Name     string `json:"name"`
 }
 
-func (c *playerController) CreateLoginLog(ctx *gin.Context) {
+func (c *PlayerController) CreateLoginLog(ctx *gin.Context) {
 	var req createLoginLogRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -56,7 +58,7 @@ func (c *playerController) CreateLoginLog(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
-func (c *playerController) ListAvailableMaps(ctx *gin.Context) {
+func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
 	playerWorlds, err := c.worldService.ListFromPlayerID(ctx, playerID)
