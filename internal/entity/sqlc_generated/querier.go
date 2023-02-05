@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*GameSession, error)
 	CreateLoginLog(ctx context.Context, playerID string) error
 	CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error
 	GetDoorFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*GetDoorFromMapConfigurationIDsRow, error)

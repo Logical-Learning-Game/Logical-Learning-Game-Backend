@@ -10,6 +10,7 @@ sql:
       - "query/door.sql"
       - "query/world.sql"
       - "query/rule.sql"
+      - "query/game_session.sql"
     engine: "postgresql"
     gen:
       go:
