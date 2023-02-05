@@ -12,6 +12,7 @@ type Querier interface {
 	CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*GameSession, error)
 	CreateLoginLog(ctx context.Context, playerID string) error
 	CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error
+	CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*PlayHistory, error)
 	GetDoorFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*GetDoorFromMapConfigurationIDsRow, error)
 	GetItemFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*GetItemFromMapConfigurationIDsRow, error)
 	GetMapConfigFromPlayerID(ctx context.Context, playerID string) ([]*GetMapConfigFromPlayerIDRow, error)
