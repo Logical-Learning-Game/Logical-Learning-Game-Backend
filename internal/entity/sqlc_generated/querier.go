@@ -14,7 +14,6 @@ type Querier interface {
 	GetDoorFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*GetDoorFromMapConfigurationIDsRow, error)
 	GetItemFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*GetItemFromMapConfigurationIDsRow, error)
 	GetMapConfigFromPlayerID(ctx context.Context, playerID string) ([]*GetMapConfigFromPlayerIDRow, error)
-	GetMapConfigurationWithItemFromPlayerID(ctx context.Context, playerID string) ([]*GetMapConfigurationWithItemFromPlayerIDRow, error)
 	GetRuleFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*MapConfigurationRule, error)
 	ListWorldFromMapConfigurationIDs(ctx context.Context, mapConfigurationIds []int64) ([]*ListWorldFromMapConfigurationIDsRow, error)
 }
