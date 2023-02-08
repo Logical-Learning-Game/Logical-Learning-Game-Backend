@@ -478,7 +478,7 @@ type PlayHistory struct {
 
 type PlayHistoryRule struct {
 	PlayHistoryID          int64 `json:"play_history_id"`
-	MapConfigurationRuldID int64 `json:"map_configuration_ruld_id"`
+	MapConfigurationRuleID int64 `json:"map_configuration_rule_id"`
 	Value                  int32 `json:"value"`
 	IsPass                 bool  `json:"is_pass"`
 }

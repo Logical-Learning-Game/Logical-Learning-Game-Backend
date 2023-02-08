@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS command_edge
 CREATE TABLE IF NOT EXISTS play_history_rule
 (
     play_history_id           BIGINT  NOT NULL REFERENCES play_history (id),
-    map_configuration_ruld_id BIGINT  NOT NULL REFERENCES map_configuration_rule (id),
+    map_configuration_rule_id BIGINT  NOT NULL REFERENCES map_configuration_rule (id),
     value                     INTEGER NOT NULL,
     is_pass                   BOOLEAN NOT NULL
 );
