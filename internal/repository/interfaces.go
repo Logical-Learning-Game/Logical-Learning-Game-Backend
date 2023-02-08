@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"llg_backend/internal/entity"
+	"time"
 )
 
 type PlayerRepository interface {
@@ -28,4 +29,15 @@ type WorldRepository interface {
 
 type RuleRepository interface {
 	ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapRule, error)
+}
+
+type CreateGameSessionParams struct {
+	PlayerID           string
+	MapConfigurationID int64
+	StartDatetime      time.Time
+	EndDatetime        time.Time
+}
+
+type GameSessionRepository interface {
+	CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*entity.PlayerGameSession, error)
 }

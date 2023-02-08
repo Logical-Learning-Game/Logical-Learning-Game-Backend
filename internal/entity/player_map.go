@@ -98,10 +98,10 @@ type PlayHistory struct {
 }
 
 type PlayerGameSession struct {
-	GameSesssionID     int64
-	PlayerID           string
-	MapConfigurationID int64
-	StartDatetime      time.Time
-	EndDatetime        time.Time
-	GameHistory        []*PlayHistory
+	GameSesssionID     int64          `json:"game_session_id"`
+	PlayerID           string         `json:"player_id"`
+	MapConfigurationID int64          `json:"map_configuration_id"`
+	StartDatetime      time.Time      `json:"start_datetime"`
+	EndDatetime        time.Time      `json:"end_datetime"`
+	GameHistory        []*PlayHistory `json:"game_histories"`
 }
