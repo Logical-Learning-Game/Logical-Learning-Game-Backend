@@ -130,6 +130,8 @@ CREATE TABLE IF NOT EXISTS game_session
     end_datetime         TIMESTAMPTZ
 );
 
+CREATE TYPE medal_type AS ENUM ('gold', 'silver', 'bronze');
+
 CREATE TABLE IF NOT EXISTS play_history
 (
     id                BIGSERIAL PRIMARY KEY,
@@ -138,6 +140,8 @@ CREATE TABLE IF NOT EXISTS play_history
     number_of_command INTEGER     NOT NULL,
     is_finited        BOOLEAN     NOT NULL,
     is_completed      BOOLEAN     NOT NULL,
+    command_medal     medal_type,
+    action_medal      medal_type,
     submit_datetime   TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 

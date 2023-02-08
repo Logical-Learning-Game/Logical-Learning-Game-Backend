@@ -276,6 +276,49 @@ func (ns NullMapDirection) Value() (driver.Value, error) {
 	return ns.MapDirection, nil
 }
 
+type MedalType string
+
+const (
+	MedalTypeGold   MedalType = "gold"
+	MedalTypeSilver MedalType = "silver"
+	MedalTypeBronze MedalType = "bronze"
+)
+
+func (e *MedalType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = MedalType(s)
+	case string:
+		*e = MedalType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for MedalType: %T", src)
+	}
+	return nil
+}
+
+type NullMedalType struct {
+	MedalType MedalType
+	Valid     bool // Valid is true if String is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullMedalType) Scan(value interface{}) error {
+	if value == nil {
+		ns.MedalType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.MedalType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullMedalType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return ns.MedalType, nil
+}
+
 type RuleTheme string
 
 const (
@@ -421,13 +464,15 @@ type MapConfigurationRule struct {
 }
 
 type PlayHistory struct {
-	ID              int64     `json:"id"`
-	GameSessionID   int64     `json:"game_session_id"`
-	ActionStep      int32     `json:"action_step"`
-	NumberOfCommand int32     `json:"number_of_command"`
-	IsFinited       bool      `json:"is_finited"`
-	IsCompleted     bool      `json:"is_completed"`
-	SubmitDatetime  time.Time `json:"submit_datetime"`
+	ID              int64         `json:"id"`
+	GameSessionID   int64         `json:"game_session_id"`
+	ActionStep      int32         `json:"action_step"`
+	NumberOfCommand int32         `json:"number_of_command"`
+	IsFinited       bool          `json:"is_finited"`
+	IsCompleted     bool          `json:"is_completed"`
+	CommandMedal    NullMedalType `json:"command_medal"`
+	ActionMedal     NullMedalType `json:"action_medal"`
+	SubmitDatetime  time.Time     `json:"submit_datetime"`
 }
 
 type PlayHistoryRule struct {

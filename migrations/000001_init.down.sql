@@ -4,6 +4,7 @@ DROP TYPE IF EXISTS command_edge_type;
 DROP TABLE IF EXISTS command_node;
 DROP TYPE IF EXISTS command_node_type;
 DROP TABLE IF EXISTS play_history;
+DROP TYPE IF EXISTS medal_type;
 DROP TABLE IF EXISTS game_session;
 DROP TABLE IF EXISTS map_configuration_for_player;
 DROP TABLE IF EXISTS map_configuration_door;
