@@ -11,18 +11,21 @@ import (
 )
 
 const createPlayHistory = `-- name: CreatePlayHistory :one
-INSERT INTO play_history (game_session_id, action_step, number_of_command, is_finited, is_completed, submit_datetime)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, game_session_id, action_step, number_of_command, is_finited, is_completed, submit_datetime
+INSERT INTO play_history (game_session_id, action_step, number_of_command, is_finited, is_completed, command_medal,
+                          action_medal, submit_datetime)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, game_session_id, action_step, number_of_command, is_finited, is_completed, command_medal, action_medal, submit_datetime
 `
 
 type CreatePlayHistoryParams struct {
-	GameSessionID   int64     `json:"game_session_id"`
-	ActionStep      int32     `json:"action_step"`
-	NumberOfCommand int32     `json:"number_of_command"`
-	IsFinited       bool      `json:"is_finited"`
-	IsCompleted     bool      `json:"is_completed"`
-	SubmitDatetime  time.Time `json:"submit_datetime"`
+	GameSessionID   int64         `json:"game_session_id"`
+	ActionStep      int32         `json:"action_step"`
+	NumberOfCommand int32         `json:"number_of_command"`
+	IsFinited       bool          `json:"is_finited"`
+	IsCompleted     bool          `json:"is_completed"`
+	CommandMedal    NullMedalType `json:"command_medal"`
+	ActionMedal     NullMedalType `json:"action_medal"`
+	SubmitDatetime  time.Time     `json:"submit_datetime"`
 }
 
 func (q *Queries) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*PlayHistory, error) {
@@ -32,6 +35,8 @@ func (q *Queries) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryPa
 		arg.NumberOfCommand,
 		arg.IsFinited,
 		arg.IsCompleted,
+		arg.CommandMedal,
+		arg.ActionMedal,
 		arg.SubmitDatetime,
 	)
 	var i PlayHistory
@@ -42,6 +47,8 @@ func (q *Queries) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryPa
 		&i.NumberOfCommand,
 		&i.IsFinited,
 		&i.IsCompleted,
+		&i.CommandMedal,
+		&i.ActionMedal,
 		&i.SubmitDatetime,
 	)
 	return &i, err

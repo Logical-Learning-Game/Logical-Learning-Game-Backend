@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"llg_backend/internal/entity"
+	"llg_backend/internal/entity/sqlc_generated"
 	"time"
 )
 
@@ -40,4 +41,19 @@ type CreateGameSessionParams struct {
 
 type GameSessionRepository interface {
 	CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*entity.PlayerGameSession, error)
+}
+
+type CreatePlayHistoryParams struct {
+	GameSessionID   int64
+	ActionStep      int
+	NumberOfCommand int
+	IsFinited       bool
+	IsCompleted     bool
+	CommandMedal    sqlc_generated.NullMedalType
+	ActionMedal     sqlc_generated.NullMedalType
+	SubmitDatetime  time.Time
+}
+
+type PlayHistoryRepository interface {
+	CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*entity.PlayHistory, error)
 }
