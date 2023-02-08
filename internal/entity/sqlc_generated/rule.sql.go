@@ -12,7 +12,7 @@ import (
 )
 
 const getRuleFromMapConfigurationIDs = `-- name: GetRuleFromMapConfigurationIDs :many
-SELECT map_configuration_id, rule, theme, parameters
+SELECT id, map_configuration_id, rule, theme, parameters
 FROM map_configuration_rule
 WHERE map_configuration_id = ANY ($1:: BIGINT [])
 `
@@ -27,6 +27,7 @@ func (q *Queries) GetRuleFromMapConfigurationIDs(ctx context.Context, mapConfigu
 	for rows.Next() {
 		var i MapConfigurationRule
 		if err := rows.Scan(
+			&i.ID,
 			&i.MapConfigurationID,
 			&i.Rule,
 			&i.Theme,

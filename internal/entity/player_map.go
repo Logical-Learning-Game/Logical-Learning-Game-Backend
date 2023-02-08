@@ -32,6 +32,7 @@ type MapDoor struct {
 }
 
 type MapRule struct {
+	ID          int64                    `json:"map_config_rule_id"`
 	MapConfigID int64                    `json:"map_config_id"`
 	Type        string                   `json:"type"`
 	Theme       sqlc_generated.RuleTheme `json:"theme"`

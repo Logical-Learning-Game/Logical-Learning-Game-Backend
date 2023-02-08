@@ -31,6 +31,7 @@ func (r *ruleRepository) ListFromMapConfigurationIDs(ctx context.Context, mapCon
 		}
 
 		mapRules = append(mapRules, &entity.MapRule{
+			ID:          row.ID,
 			MapConfigID: row.MapConfigurationID,
 			Type:        row.Rule,
 			Theme:       row.Theme,

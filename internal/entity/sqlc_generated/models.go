@@ -457,6 +457,7 @@ type MapConfigurationItem struct {
 }
 
 type MapConfigurationRule struct {
+	ID                 int64     `json:"id"`
 	MapConfigurationID int64     `json:"map_configuration_id"`
 	Rule               string    `json:"rule"`
 	Theme              RuleTheme `json:"theme"`
@@ -476,10 +477,10 @@ type PlayHistory struct {
 }
 
 type PlayHistoryRule struct {
-	PlayHistoryID int64  `json:"play_history_id"`
-	Rule          string `json:"rule"`
-	Value         int32  `json:"value"`
-	IsPass        bool   `json:"is_pass"`
+	PlayHistoryID          int64 `json:"play_history_id"`
+	MapConfigurationRuldID int64 `json:"map_configuration_ruld_id"`
+	Value                  int32 `json:"value"`
+	IsPass                 bool  `json:"is_pass"`
 }
 
 type Player struct {

@@ -97,6 +97,7 @@ CREATE TYPE rule_theme AS ENUM ('normal', 'conditional', 'loop');
 
 CREATE TABLE IF NOT EXISTS map_configuration_rule
 (
+    id                   BIGSERIAL PRIMARY KEY,
     map_configuration_id BIGINT       NOT NULL REFERENCES map_configuration (id),
     rule                 VARCHAR(255) NOT NULL REFERENCES rule (name),
     theme                rule_theme   NOT NULL,
@@ -178,8 +179,8 @@ CREATE TABLE IF NOT EXISTS command_edge
 
 CREATE TABLE IF NOT EXISTS play_history_rule
 (
-    play_history_id BIGINT       NOT NULL REFERENCES play_history (id),
-    rule            VARCHAR(255) NOT NULL REFERENCES rule (name),
-    value           INTEGER      NOT NULL,
-    is_pass         BOOLEAN      NOT NULL
+    play_history_id           BIGINT  NOT NULL REFERENCES play_history (id),
+    map_configuration_ruld_id BIGINT  NOT NULL REFERENCES map_configuration_rule (id),
+    value                     INTEGER NOT NULL,
+    is_pass                   BOOLEAN NOT NULL
 );
