@@ -282,6 +282,7 @@ const (
 	MedalTypeGold   MedalType = "gold"
 	MedalTypeSilver MedalType = "silver"
 	MedalTypeBronze MedalType = "bronze"
+	MedalTypeNone   MedalType = "none"
 )
 
 func (e *MedalType) Scan(src interface{}) error {
@@ -465,21 +466,20 @@ type MapConfigurationRule struct {
 }
 
 type PlayHistory struct {
-	ID              int64         `json:"id"`
-	GameSessionID   int64         `json:"game_session_id"`
-	ActionStep      int32         `json:"action_step"`
-	NumberOfCommand int32         `json:"number_of_command"`
-	IsFinited       bool          `json:"is_finited"`
-	IsCompleted     bool          `json:"is_completed"`
-	CommandMedal    NullMedalType `json:"command_medal"`
-	ActionMedal     NullMedalType `json:"action_medal"`
-	SubmitDatetime  time.Time     `json:"submit_datetime"`
+	ID              int64     `json:"id"`
+	GameSessionID   int64     `json:"game_session_id"`
+	ActionStep      int32     `json:"action_step"`
+	NumberOfCommand int32     `json:"number_of_command"`
+	IsFinited       bool      `json:"is_finited"`
+	IsCompleted     bool      `json:"is_completed"`
+	CommandMedal    MedalType `json:"command_medal"`
+	ActionMedal     MedalType `json:"action_medal"`
+	SubmitDatetime  time.Time `json:"submit_datetime"`
 }
 
 type PlayHistoryRule struct {
 	PlayHistoryID          int64 `json:"play_history_id"`
 	MapConfigurationRuleID int64 `json:"map_configuration_rule_id"`
-	Value                  int32 `json:"value"`
 	IsPass                 bool  `json:"is_pass"`
 }
 

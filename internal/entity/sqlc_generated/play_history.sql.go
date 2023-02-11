@@ -18,14 +18,14 @@ RETURNING id, game_session_id, action_step, number_of_command, is_finited, is_co
 `
 
 type CreatePlayHistoryParams struct {
-	GameSessionID   int64         `json:"game_session_id"`
-	ActionStep      int32         `json:"action_step"`
-	NumberOfCommand int32         `json:"number_of_command"`
-	IsFinited       bool          `json:"is_finited"`
-	IsCompleted     bool          `json:"is_completed"`
-	CommandMedal    NullMedalType `json:"command_medal"`
-	ActionMedal     NullMedalType `json:"action_medal"`
-	SubmitDatetime  time.Time     `json:"submit_datetime"`
+	GameSessionID   int64     `json:"game_session_id"`
+	ActionStep      int32     `json:"action_step"`
+	NumberOfCommand int32     `json:"number_of_command"`
+	IsFinited       bool      `json:"is_finited"`
+	IsCompleted     bool      `json:"is_completed"`
+	CommandMedal    MedalType `json:"command_medal"`
+	ActionMedal     MedalType `json:"action_medal"`
+	SubmitDatetime  time.Time `json:"submit_datetime"`
 }
 
 func (q *Queries) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*PlayHistory, error) {

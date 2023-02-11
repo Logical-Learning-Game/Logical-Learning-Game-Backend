@@ -49,8 +49,8 @@ type CreatePlayHistoryParams struct {
 	NumberOfCommand int
 	IsFinited       bool
 	IsCompleted     bool
-	CommandMedal    sqlc_generated.NullMedalType
-	ActionMedal     sqlc_generated.NullMedalType
+	CommandMedal    sqlc_generated.MedalType
+	ActionMedal     sqlc_generated.MedalType
 	SubmitDatetime  time.Time
 }
 

@@ -88,16 +88,17 @@ type RuleHistory struct {
 }
 
 type PlayHistory struct {
-	ID              int64                        `json:"play_history_id"`
-	GameSessionID   int64                        `json:"game_session_id"`
-	ActionStep      int                          `json:"action_step"`
-	NumberOfCommand int                          `json:"number_of_command"`
-	IsFinited       bool                         `json:"is_finited"`
-	IsCompleted     bool                         `json:"is_completed"`
-	CommandMedal    sqlc_generated.NullMedalType `json:"command_medal"`
-	ActionMedal     sqlc_generated.NullMedalType `json:"action_medal"`
-	SubmitDatetime  time.Time                    `json:"submit_datetime"`
-	Rules           []*RuleHistory               `json:"rules"`
+	ID              int64                    `json:"play_history_id"`
+	GameSessionID   int64                    `json:"game_session_id"`
+	ActionStep      int                      `json:"action_step"`
+	NumberOfCommand int                      `json:"number_of_command"`
+	IsFinited       bool                     `json:"is_finited"`
+	IsCompleted     bool                     `json:"is_completed"`
+	CommandMedal    sqlc_generated.MedalType `json:"command_medal"`
+	ActionMedal     sqlc_generated.MedalType `json:"action_medal"`
+	SubmitDatetime  time.Time                `json:"submit_datetime"`
+	StateValue      *StateValue              `json:"state_value"`
+	Rules           []*RuleHistory           `json:"rules"`
 }
 
 type PlayerGameSession struct {
