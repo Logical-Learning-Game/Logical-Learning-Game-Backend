@@ -8,6 +8,8 @@ package sqlc_generated
 import (
 	"context"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const createPlayHistory = `-- name: CreatePlayHistory :one
@@ -50,6 +52,84 @@ func (q *Queries) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryPa
 		&i.CommandMedal,
 		&i.ActionMedal,
 		&i.SubmitDatetime,
+	)
+	return &i, err
+}
+
+const createRuleHistory = `-- name: CreateRuleHistory :one
+INSERT INTO play_history_rule (play_history_id, map_configuration_rule_id, is_pass)
+VALUES ($1, $2, $3)
+RETURNING play_history_id, map_configuration_rule_id, is_pass
+`
+
+type CreateRuleHistoryParams struct {
+	PlayHistoryID          int64 `json:"play_history_id"`
+	MapConfigurationRuleID int64 `json:"map_configuration_rule_id"`
+	IsPass                 bool  `json:"is_pass"`
+}
+
+func (q *Queries) CreateRuleHistory(ctx context.Context, arg CreateRuleHistoryParams) (*PlayHistoryRule, error) {
+	row := q.db.QueryRowContext(ctx, createRuleHistory, arg.PlayHistoryID, arg.MapConfigurationRuleID, arg.IsPass)
+	var i PlayHistoryRule
+	err := row.Scan(&i.PlayHistoryID, &i.MapConfigurationRuleID, &i.IsPass)
+	return &i, err
+}
+
+const createStateValue = `-- name: CreateStateValue :one
+INSERT INTO state_value (play_history_id, command_count, forward_command_count, right_command_count, back_command_count,
+                         left_command_count, condition_command_count, action_count, forward_action_count,
+                         right_action_count, back_action_count, left_action_count, condition_action_count)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+RETURNING play_history_id, command_count, forward_command_count, right_command_count, back_command_count, left_command_count, condition_command_count, action_count, forward_action_count, right_action_count, back_action_count, left_action_count, condition_action_count
+`
+
+type CreateStateValueParams struct {
+	PlayHistoryID         int64 `json:"play_history_id"`
+	CommandCount          int32 `json:"command_count"`
+	ForwardCommandCount   int32 `json:"forward_command_count"`
+	RightCommandCount     int32 `json:"right_command_count"`
+	BackCommandCount      int32 `json:"back_command_count"`
+	LeftCommandCount      int32 `json:"left_command_count"`
+	ConditionCommandCount int32 `json:"condition_command_count"`
+	ActionCount           int32 `json:"action_count"`
+	ForwardActionCount    int32 `json:"forward_action_count"`
+	RightActionCount      int32 `json:"right_action_count"`
+	BackActionCount       int32 `json:"back_action_count"`
+	LeftActionCount       int32 `json:"left_action_count"`
+	ConditionActionCount  int32 `json:"condition_action_count"`
+}
+
+func (q *Queries) CreateStateValue(ctx context.Context, arg CreateStateValueParams) (*StateValue, error) {
+	row := q.db.QueryRowContext(ctx, createStateValue,
+		arg.PlayHistoryID,
+		arg.CommandCount,
+		arg.ForwardCommandCount,
+		arg.RightCommandCount,
+		arg.BackCommandCount,
+		arg.LeftCommandCount,
+		arg.ConditionCommandCount,
+		arg.ActionCount,
+		arg.ForwardActionCount,
+		arg.RightActionCount,
+		arg.BackActionCount,
+		arg.LeftActionCount,
+		arg.ConditionActionCount,
+	)
+	var i StateValue
+	err := row.Scan(
+		&i.PlayHistoryID,
+		&i.CommandCount,
+		&i.ForwardCommandCount,
+		&i.RightCommandCount,
+		&i.BackCommandCount,
+		&i.LeftCommandCount,
+		&i.ConditionCommandCount,
+		&i.ActionCount,
+		&i.ForwardActionCount,
+		&i.RightActionCount,
+		&i.BackActionCount,
+		&i.LeftActionCount,
+		&i.ConditionActionCount,
 	)
 	return &i, err
 }

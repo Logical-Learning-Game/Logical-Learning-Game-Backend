@@ -54,6 +54,30 @@ type CreatePlayHistoryParams struct {
 	SubmitDatetime  time.Time
 }
 
+type CreateRuleHistoryParams struct {
+	PlayHistoryID   int64
+	MapConfigRuleID int64
+	IsPass          bool
+}
+
+type CreateStateValueParams struct {
+	PlayHistoryID         int64
+	CommandCount          int
+	ForwardCommandCount   int
+	RightCommandCount     int
+	BackCommandCount      int
+	LeftCommandCount      int
+	ConditionCommandCount int
+	ActionCount           int
+	ForwardActionCount    int
+	RightActionCount      int
+	BackActionCount       int
+	LeftActionCount       int
+	ConditionActionCount  int
+}
+
 type PlayHistoryRepository interface {
 	CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*entity.PlayHistory, error)
+	CreateRuleHistory(ctx context.Context, arg CreateRuleHistoryParams) (*entity.RuleHistory, error)
+	CreateStateValue(ctx context.Context, arg CreateStateValueParams) (*entity.StateValue, error)
 }
