@@ -81,9 +81,10 @@ type World struct {
 }
 
 type RuleHistory struct {
-	PlayHistoryID int64
-	Rule          *MapRule
-	IsPass        bool
+	MapConfigRuleID int64    `json:"map_configuration_rule_id"`
+	PlayHistoryID   int64    `json:"play_history_id"`
+	Rule            *MapRule `json:"rule"`
+	IsPass          bool     `json:"is_pass"`
 }
 
 type PlayHistory struct {
