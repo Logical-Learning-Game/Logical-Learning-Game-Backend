@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS state_value;
 DROP TABLE IF EXISTS play_history_rule;
 DROP TABLE IF EXISTS command_edge;
 DROP TYPE IF EXISTS command_edge_type;

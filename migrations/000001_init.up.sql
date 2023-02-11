@@ -181,6 +181,22 @@ CREATE TABLE IF NOT EXISTS play_history_rule
 (
     play_history_id           BIGINT  NOT NULL REFERENCES play_history (id),
     map_configuration_rule_id BIGINT  NOT NULL REFERENCES map_configuration_rule (id),
-    value                     INTEGER NOT NULL,
     is_pass                   BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS state_value
+(
+    play_history_id         BIGINT  NOT NULL REFERENCES play_history (id),
+    command_count           INTEGER NOT NULL,
+    forward_command_count   INTEGER NOT NULL,
+    right_command_count     INTEGER NOT NULL,
+    back_command_count      INTEGER NOT NULL,
+    left_command_count      INTEGER NOT NULL,
+    condition_command_count INTEGER NOT NULL,
+    action_count            INTEGER NOT NULL,
+    forward_action_count    INTEGER NOT NULL,
+    right_action_count      INTEGER NOT NULL,
+    back_action_count       INTEGER NOT NULL,
+    left_action_count       INTEGER NOT NULL,
+    condition_action_count  INTEGER NOT NULL
 );

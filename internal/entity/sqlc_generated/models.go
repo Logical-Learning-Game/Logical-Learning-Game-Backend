@@ -494,6 +494,22 @@ type Rule struct {
 	Active bool   `json:"active"`
 }
 
+type StateValue struct {
+	PlayHistoryID         int64 `json:"play_history_id"`
+	CommandCount          int32 `json:"command_count"`
+	ForwardCommandCount   int32 `json:"forward_command_count"`
+	RightCommandCount     int32 `json:"right_command_count"`
+	BackCommandCount      int32 `json:"back_command_count"`
+	LeftCommandCount      int32 `json:"left_command_count"`
+	ConditionCommandCount int32 `json:"condition_command_count"`
+	ActionCount           int32 `json:"action_count"`
+	ForwardActionCount    int32 `json:"forward_action_count"`
+	RightActionCount      int32 `json:"right_action_count"`
+	BackActionCount       int32 `json:"back_action_count"`
+	LeftActionCount       int32 `json:"left_action_count"`
+	ConditionActionCount  int32 `json:"condition_action_count"`
+}
+
 type World struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`

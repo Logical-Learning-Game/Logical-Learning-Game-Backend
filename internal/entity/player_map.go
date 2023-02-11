@@ -84,7 +84,6 @@ type RuleHistory struct {
 	PlayHistoryID int64
 	Rule          *MapRule
 	IsPass        bool
-	Value         int
 }
 
 type PlayHistory struct {
@@ -99,6 +98,21 @@ type PlayHistory struct {
 	SubmitDatetime  time.Time                `json:"submit_datetime"`
 	StateValue      *StateValue              `json:"state_value"`
 	Rules           []*RuleHistory           `json:"rules"`
+}
+
+type StateValue struct {
+	CommandCount          int `json:"command_count"`
+	ForwardCommandCount   int `json:"forward_command_count"`
+	RightCommandCount     int `json:"right_command_count"`
+	BackCommandCount      int `json:"back_command_count"`
+	LeftCommandCount      int `json:"left_command_count"`
+	ConditionCommandCount int `json:"condition_command_count"`
+	ActionCount           int `json:"action_count"`
+	ForwardActionCount    int `json:"forward_action_count"`
+	RightActionCount      int `json:"right_action_count"`
+	BackActionCount       int `json:"back_action_count"`
+	LeftActionCount       int `json:"left_action_count"`
+	ConditionActionCount  int `json:"condition_action_count"`
 }
 
 type PlayerGameSession struct {
