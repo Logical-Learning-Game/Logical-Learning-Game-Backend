@@ -81,3 +81,9 @@ type PlayHistoryRepository interface {
 	CreateRuleHistory(ctx context.Context, arg CreateRuleHistoryParams) (*entity.RuleHistory, error)
 	CreateStateValue(ctx context.Context, arg CreateStateValueParams) (*entity.StateValue, error)
 }
+
+type UnitOfWork interface {
+	Do(ctx context.Context, fn UnitOfWorkBlock) error
+}
+
+type UnitOfWorkBlock func(*UnitOfWorkStore) error
