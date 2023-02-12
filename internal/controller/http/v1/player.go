@@ -9,24 +9,27 @@ import (
 )
 
 type PlayerController struct {
-	playerService service.PlayerService
-	worldService  service.WorldService
+	playerService          service.PlayerService
+	worldService           service.WorldService
+	playerStatisticService service.PlayerStatisticService
 }
 
-func NewPlayerController(playerService service.PlayerService, worldService service.WorldService) *PlayerController {
+func NewPlayerController(playerService service.PlayerService, worldService service.WorldService, playerStatisticService service.PlayerStatisticService) *PlayerController {
 	return &PlayerController{
-		playerService: playerService,
-		worldService:  worldService,
+		playerService:          playerService,
+		worldService:           worldService,
+		playerStatisticService: playerStatisticService,
 	}
 }
 
 func (c *PlayerController) initRoutes(handler *gin.RouterGroup) {
-	h := handler.Group("/player")
+	h := handler.Group("/players")
 	{
 		h.POST("/login_log", c.CreateLoginLog)
 		playerGroup := h.Group("/:playerID")
 		{
 			playerGroup.GET("/available_maps", c.ListAvailableMaps)
+			playerGroup.POST("/statistics", c.CreateSessionHistory)
 		}
 	}
 }
@@ -67,4 +70,20 @@ func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, playerWorlds)
+}
+
+func (c *PlayerController) CreateSessionHistory(ctx *gin.Context) {
+	var req service.CreateSessionHistoryParams
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	gameSession, err := c.playerStatisticService.CreateSessionHistory(ctx, req)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gameSession)
 }

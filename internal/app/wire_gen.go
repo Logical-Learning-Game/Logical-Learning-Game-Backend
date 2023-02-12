@@ -7,6 +7,7 @@
 package app
 
 import (
+	"database/sql"
 	"github.com/google/wire"
 	"llg_backend/internal/controller/http/v1"
 	"llg_backend/internal/entity/sqlc_generated"
@@ -16,7 +17,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializePlayerController(querier sqlc_generated.Querier) *v1.PlayerController {
+func InitializePlayerController(querier sqlc_generated.Querier, db *sql.DB) *v1.PlayerController {
 	playerRepository := repository.NewPlayerRepository(querier)
 	playerService := service.NewPlayerService(playerRepository)
 	mapConfigurationRepository := repository.NewMapConfigurationRepository(querier)
@@ -26,10 +27,12 @@ func InitializePlayerController(querier sqlc_generated.Querier) *v1.PlayerContro
 	mapConfigurationService := service.NewMapConfigurationService(mapConfigurationRepository, itemRepository, doorRepository, ruleRepository)
 	worldRepository := repository.NewWorldRepository(querier)
 	worldService := service.NewWorldService(mapConfigurationService, worldRepository)
-	playerController := v1.NewPlayerController(playerService, worldService)
+	unitOfWork := repository.NewUnitOfWork(db)
+	playerStatisticService := service.NewPlayerStatisticService(unitOfWork)
+	playerController := v1.NewPlayerController(playerService, worldService, playerStatisticService)
 	return playerController
 }
 
 // wire.go:
 
-var providerSet = wire.NewSet(service.NewWorldService, service.NewPlayerService, repository.NewPlayerRepository, service.NewMapConfigurationService, repository.NewItemRepository, repository.NewDoorRepository, repository.NewRuleRepository, repository.NewMapConfigurationRepository, repository.NewWorldRepository)
+var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewWorldService, service.NewPlayerService, repository.NewPlayerRepository, service.NewMapConfigurationService, repository.NewItemRepository, repository.NewDoorRepository, repository.NewRuleRepository, repository.NewMapConfigurationRepository, repository.NewWorldRepository, repository.NewPlayHistoryRepository, repository.NewGameSessionRepository, repository.NewUnitOfWork)
