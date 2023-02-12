@@ -34,6 +34,7 @@ func (r ruleRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConf
 			ID:          row.ID,
 			MapConfigID: row.MapConfigurationID,
 			Type:        row.Rule,
+			Order:       int(row.RuleOrder),
 			Theme:       row.Theme,
 			Parameters:  intSlice,
 		})

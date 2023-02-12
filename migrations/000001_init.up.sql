@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS map_configuration_rule
     id                   BIGSERIAL PRIMARY KEY,
     map_configuration_id BIGINT       NOT NULL REFERENCES map_configuration (id),
     rule                 VARCHAR(255) NOT NULL REFERENCES rule (name),
+    rule_order           INTEGER      NOT NULL,
     theme                rule_theme   NOT NULL,
     parameters           INTEGER[]    NOT NULL
 );

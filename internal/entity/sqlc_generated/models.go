@@ -462,6 +462,7 @@ type MapConfigurationRule struct {
 	ID                 int64     `json:"id"`
 	MapConfigurationID int64     `json:"map_configuration_id"`
 	Rule               string    `json:"rule"`
+	RuleOrder          int32     `json:"rule_order"`
 	Theme              RuleTheme `json:"theme"`
 	Parameters         []int32   `json:"parameters"`
 }

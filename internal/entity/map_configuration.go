@@ -69,6 +69,7 @@ type MapRule struct {
 	ID          int64                    `json:"map_config_rule_id"`
 	MapConfigID int64                    `json:"-"`
 	Type        string                   `json:"type"`
+	Order       int                      `json:"order"`
 	Theme       sqlc_generated.RuleTheme `json:"theme"`
 	Parameters  []int                    `json:"parameters"`
 }

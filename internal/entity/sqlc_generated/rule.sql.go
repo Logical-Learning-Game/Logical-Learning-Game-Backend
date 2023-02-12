@@ -12,7 +12,7 @@ import (
 )
 
 const getRuleFromMapConfigurationIDs = `-- name: GetRuleFromMapConfigurationIDs :many
-SELECT id, map_configuration_id, rule, theme, parameters
+SELECT id, map_configuration_id, rule, rule_order, theme, parameters
 FROM map_configuration_rule
 WHERE map_configuration_id = ANY ($1:: BIGINT [])
 `
@@ -30,6 +30,7 @@ func (q *Queries) GetRuleFromMapConfigurationIDs(ctx context.Context, mapConfigu
 			&i.ID,
 			&i.MapConfigurationID,
 			&i.Rule,
+			&i.RuleOrder,
 			&i.Theme,
 			pq.Array(&i.Parameters),
 		); err != nil {
