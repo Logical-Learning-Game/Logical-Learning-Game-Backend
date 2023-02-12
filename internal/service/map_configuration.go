@@ -26,7 +26,7 @@ func NewMapConfigurationService(
 	}
 }
 
-func (s *mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error) {
+func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error) {
 	mapConfigs, err := s.mapConfigRepo.ListFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err

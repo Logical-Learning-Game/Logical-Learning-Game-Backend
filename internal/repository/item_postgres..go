@@ -16,7 +16,7 @@ func NewItemRepository(querier sqlc_generated.Querier) entity.ItemRepository {
 	}
 }
 
-func (r *itemRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapItem, error) {
+func (r itemRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapItem, error) {
 	itemRows, err := r.Querier.GetItemFromMapConfigurationIDs(ctx, mapConfigurationIDs)
 	if err != nil {
 		return nil, err

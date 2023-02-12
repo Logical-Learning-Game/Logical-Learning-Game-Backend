@@ -17,11 +17,11 @@ func NewPlayerService(playerRepo entity.PlayerRepository) entity.PlayerService {
 	}
 }
 
-func (s *playerService) CreateOrUpdatePlayerInformation(ctx context.Context, playerID, email, name string) error {
+func (s playerService) CreateOrUpdatePlayerInformation(ctx context.Context, playerID, email, name string) error {
 	return s.playerRepo.CreateOrUpdatePlayer(ctx, playerID, email, name)
 }
 
-func (s *playerService) CreateLoginLog(ctx context.Context, playerID string) error {
+func (s playerService) CreateLoginLog(ctx context.Context, playerID string) error {
 	return s.playerRepo.CreateLoginLog(ctx, playerID)
 }
 
@@ -38,7 +38,7 @@ func NewPlayerServiceWithLog(playerService entity.PlayerService, log logger.Logg
 	}
 }
 
-func (s *playerServiceWithLog) CreateLoginLog(ctx context.Context, playerID string) error {
+func (s playerServiceWithLog) CreateLoginLog(ctx context.Context, playerID string) error {
 	sanitizedPlayerID := strings.Replace(playerID, "\n", "", -1)
 	sanitizedPlayerID = strings.Replace(sanitizedPlayerID, "\r", "", -1)
 	s.log.Debugw("CreateLoginLog - param", "playerID", sanitizedPlayerID)

@@ -16,7 +16,7 @@ func NewRuleRepository(querier sqlc_generated.Querier) entity.RuleRepository {
 	}
 }
 
-func (r *ruleRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapRule, error) {
+func (r ruleRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapRule, error) {
 	ruleRows, err := r.Querier.GetRuleFromMapConfigurationIDs(ctx, mapConfigurationIDs)
 	if err != nil {
 		return nil, err

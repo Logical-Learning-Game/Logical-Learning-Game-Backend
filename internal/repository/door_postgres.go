@@ -16,7 +16,7 @@ func NewDoorRepository(querier sqlc_generated.Querier) entity.DoorRepository {
 	}
 }
 
-func (r *doorRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapDoor, error) {
+func (r doorRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.MapDoor, error) {
 	doorRows, err := r.Querier.GetDoorFromMapConfigurationIDs(ctx, mapConfigurationIDs)
 	if err != nil {
 		return nil, err

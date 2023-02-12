@@ -16,7 +16,7 @@ func NewWorldRepository(querier sqlc_generated.Querier) entity.WorldRepository {
 	}
 }
 
-func (r *worldRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.World, error) {
+func (r worldRepository) ListFromMapConfigurationIDs(ctx context.Context, mapConfigurationIDs []int64) ([]*entity.World, error) {
 	worldRows, err := r.Querier.ListWorldFromMapConfigurationIDs(ctx, mapConfigurationIDs)
 	if err != nil {
 		return nil, err

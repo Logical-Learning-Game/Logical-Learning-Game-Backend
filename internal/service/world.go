@@ -17,7 +17,7 @@ func NewWorldService(mapConfigService entity.MapConfigurationService, worldRepo 
 	}
 }
 
-func (s *worldService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.World, error) {
+func (s worldService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.World, error) {
 	mapConfigs, err := s.mapConfigService.ListFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err

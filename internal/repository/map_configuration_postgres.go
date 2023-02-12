@@ -17,7 +17,7 @@ func NewMapConfigurationRepository(querier sqlc_generated.Querier) entity.MapCon
 	}
 }
 
-func (r *mapConfigurationRepository) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error) {
+func (r mapConfigurationRepository) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error) {
 	mapConfigRows, err := r.Querier.GetMapConfigFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err

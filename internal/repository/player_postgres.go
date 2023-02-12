@@ -18,7 +18,7 @@ func NewPlayerRepository(querier sqlc_generated.Querier) entity.PlayerRepository
 	}
 }
 
-func (p *playerRepository) CreateOrUpdatePlayer(ctx context.Context, playerID, email, name string) error {
+func (p playerRepository) CreateOrUpdatePlayer(ctx context.Context, playerID, email, name string) error {
 	emailArg := sql.NullString{
 		String: email,
 		Valid:  true,
