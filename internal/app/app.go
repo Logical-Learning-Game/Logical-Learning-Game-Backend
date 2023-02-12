@@ -38,7 +38,7 @@ func Run(cfg *config.Config) {
 	}
 
 	postgresQuery := sqlc_generated.New(conn)
-	playerController := InitializePlayerController(postgresQuery)
+	playerController := InitializePlayerController(postgresQuery, conn)
 
 	v1.NewRouter(handler, playerController)
 
