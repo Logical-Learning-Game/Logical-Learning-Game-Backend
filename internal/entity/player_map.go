@@ -116,8 +116,8 @@ type StateValue struct {
 	ConditionActionCount  int `json:"condition_action_count"`
 }
 
-type PlayerGameSession struct {
-	GameSesssionID     int64          `json:"game_session_id"`
+type GameSession struct {
+	ID                 int64          `json:"game_session_id"`
 	PlayerID           string         `json:"player_id"`
 	MapConfigurationID int64          `json:"map_configuration_id"`
 	StartDatetime      time.Time      `json:"start_datetime"`
