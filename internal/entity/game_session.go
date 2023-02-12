@@ -104,10 +104,9 @@ type CreateCommandEdgeParams struct {
 }
 
 type RuleHistory struct {
-	MapConfigRuleID int64    `json:"map_configuration_rule_id"`
-	PlayHistoryID   int64    `json:"play_history_id"`
-	Rule            *MapRule `json:"rule"`
-	IsPass          bool     `json:"is_pass"`
+	MapConfigRuleID int64 `json:"map_configuration_rule_id"`
+	PlayHistoryID   int64 `json:"-"`
+	IsPass          bool  `json:"is_pass"`
 }
 
 type StateValue struct {

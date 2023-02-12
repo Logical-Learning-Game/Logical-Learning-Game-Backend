@@ -66,7 +66,6 @@ func (r playHistoryRepository) CreateRuleHistory(ctx context.Context, arg entity
 	ruleHistory := &entity.RuleHistory{
 		MapConfigRuleID: ruleHistoryRow.MapConfigurationRuleID,
 		PlayHistoryID:   ruleHistoryRow.PlayHistoryID,
-		Rule:            nil,
 		IsPass:          ruleHistoryRow.IsPass,
 	}
 
