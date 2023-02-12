@@ -15,7 +15,7 @@ func NewPlayerStatisticService(unitOfWork entity.UnitOfWork) entity.PlayerStatis
 	}
 }
 
-func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg entity.CreateSessionHistoryParams) (*entity.GameSession, error) {
+func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg entity.CreateSessionHistoryRequest) (*entity.GameSession, error) {
 	var resultGameSession *entity.GameSession
 
 	err := s.unitOfWork.Do(ctx, func(store *entity.UnitOfWorkStore) error {
