@@ -153,9 +153,9 @@ CREATE TYPE command_node_type AS ENUM
         'conditional_c',
         'conditional_d',
         'conditional_e',
-        'up',
+        'forward',
         'left',
-        'down',
+        'back',
         'right'
         );
 

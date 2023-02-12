@@ -61,9 +61,9 @@ const (
 	CommandNodeTypeConditionalC CommandNodeType = "conditional_c"
 	CommandNodeTypeConditionalD CommandNodeType = "conditional_d"
 	CommandNodeTypeConditionalE CommandNodeType = "conditional_e"
-	CommandNodeTypeUp           CommandNodeType = "up"
+	CommandNodeTypeForward      CommandNodeType = "forward"
 	CommandNodeTypeLeft         CommandNodeType = "left"
-	CommandNodeTypeDown         CommandNodeType = "down"
+	CommandNodeTypeBack         CommandNodeType = "back"
 	CommandNodeTypeRight        CommandNodeType = "right"
 )
 
