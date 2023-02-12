@@ -56,6 +56,7 @@ func (ns NullCommandEdgeType) Value() (driver.Value, error) {
 type CommandNodeType string
 
 const (
+	CommandNodeTypeStart        CommandNodeType = "start"
 	CommandNodeTypeConditionalA CommandNodeType = "conditional_a"
 	CommandNodeTypeConditionalB CommandNodeType = "conditional_b"
 	CommandNodeTypeConditionalC CommandNodeType = "conditional_c"

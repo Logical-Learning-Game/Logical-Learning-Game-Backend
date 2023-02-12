@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS play_history
 
 CREATE TYPE command_node_type AS ENUM
     (
+        'start',
         'conditional_a',
         'conditional_b',
         'conditional_c',
