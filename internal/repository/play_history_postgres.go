@@ -44,6 +44,8 @@ func (r playHistoryRepository) CreatePlayHistory(ctx context.Context, arg entity
 		CommandMedal:    playHistoryRow.CommandMedal,
 		SubmitDatetime:  playHistoryRow.SubmitDatetime,
 		Rules:           make([]*entity.RuleHistory, 0),
+		CommandNodes:    make([]*entity.CommandNode, 0),
+		CommandEdges:    make([]*entity.CommandEdge, 0),
 	}
 
 	return playHistory, nil
@@ -109,4 +111,51 @@ func (r playHistoryRepository) CreateStateValue(ctx context.Context, arg entity.
 	}
 
 	return stateValue, nil
+}
+
+func (r playHistoryRepository) CreateCommandNode(ctx context.Context, arg entity.CreateCommandNodeParams) (*entity.CommandNode, error) {
+	newCreatedArg := sqlc_generated.CreateCommandNodeParams{
+		PlayHistoryID:   arg.PlayHistoryID,
+		Type:            arg.Type,
+		InGamePositionX: arg.InGamePosition.X,
+		InGamePositionY: arg.InGamePosition.Y,
+	}
+
+	commandNodeRow, err := r.Querier.CreateCommandNode(ctx, newCreatedArg)
+	if err != nil {
+		return nil, err
+	}
+
+	commandNode := &entity.CommandNode{
+		ID:            commandNodeRow.ID,
+		PlayHistoryID: commandNodeRow.PlayHistoryID,
+		Type:          commandNodeRow.Type,
+		InGamePosition: entity.Vector2Float{
+			X: commandNodeRow.InGamePositionX,
+			Y: commandNodeRow.InGamePositionY,
+		},
+	}
+
+	return commandNode, nil
+}
+
+func (r playHistoryRepository) CreateCommandEdge(ctx context.Context, arg entity.CreateCommandEdgeParams) (*entity.CommandEdge, error) {
+	newCreatedArg := sqlc_generated.CreateCommandEdgeParams{
+		SourceNodeID:      arg.SourceNodeID,
+		DestinationNodeID: arg.DestinationNodeID,
+		Type:              arg.Type,
+	}
+
+	commandEdgeRow, err := r.Querier.CreateCommandEdge(ctx, newCreatedArg)
+	if err != nil {
+		return nil, err
+	}
+
+	commandEdge := &entity.CommandEdge{
+		SourceNodeID:      commandEdgeRow.SourceNodeID,
+		DestinationNodeID: commandEdgeRow.DestinationNodeID,
+		Type:              commandEdgeRow.Type,
+	}
+
+	return commandEdge, nil
 }

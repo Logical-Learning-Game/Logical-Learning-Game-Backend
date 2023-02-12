@@ -16,6 +16,20 @@ type GameHistoryParams struct {
 	SubmitDatetime  time.Time                `json:"submit_datetime"`
 	StateValue      *StateValueParams        `json:"state_value"`
 	Rules           []*RuleParams            `json:"rules"`
+	CommandNodes    []*CommandNodeParams     `json:"command_nodes"`
+	CommandEdges    []*CommandEdgeParams     `json:"command_edges"`
+}
+
+type CommandNodeParams struct {
+	NodeIndex      int                            `json:"node_index"`
+	Type           sqlc_generated.CommandNodeType `json:"type"`
+	InGamePosition Vector2Float                   `json:"in_game_position"`
+}
+
+type CommandEdgeParams struct {
+	SourceNodeIndex  int                            `json:"source_node_index"`
+	DestinationIndex int                            `json:"destination_node_index"`
+	Type             sqlc_generated.CommandEdgeType `json:"type"`
 }
 
 type StateValueParams struct {

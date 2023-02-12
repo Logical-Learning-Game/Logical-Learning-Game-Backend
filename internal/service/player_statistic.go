@@ -29,16 +29,16 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg en
 			return txErr
 		}
 
-		for _, v := range arg.GameHistories {
+		for _, history := range arg.GameHistories {
 			playHistory, txErr := store.PlayHistoryRepo.CreatePlayHistory(ctx, entity.CreatePlayHistoryParams{
 				GameSessionID:   gameSession.ID,
-				ActionStep:      v.ActionStep,
-				NumberOfCommand: v.NumberOfCommand,
-				IsFinited:       v.IsFinited,
-				IsCompleted:     v.IsCompleted,
-				CommandMedal:    v.CommandMedal,
-				ActionMedal:     v.ActionMedal,
-				SubmitDatetime:  v.SubmitDatetime,
+				ActionStep:      history.ActionStep,
+				NumberOfCommand: history.NumberOfCommand,
+				IsFinited:       history.IsFinited,
+				IsCompleted:     history.IsCompleted,
+				CommandMedal:    history.CommandMedal,
+				ActionMedal:     history.ActionMedal,
+				SubmitDatetime:  history.SubmitDatetime,
 			})
 			if txErr != nil {
 				return txErr
@@ -46,18 +46,18 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg en
 
 			stateValue, txErr := store.PlayHistoryRepo.CreateStateValue(ctx, entity.CreateStateValueParams{
 				PlayHistoryID:         playHistory.ID,
-				CommandCount:          v.StateValue.CommandCount,
-				ForwardCommandCount:   v.StateValue.ForwardCommandCount,
-				RightCommandCount:     v.StateValue.RightCommandCount,
-				BackCommandCount:      v.StateValue.BackCommandCount,
-				LeftCommandCount:      v.StateValue.LeftCommandCount,
-				ConditionCommandCount: v.StateValue.ConditionCommandCount,
-				ActionCount:           v.StateValue.ActionCount,
-				ForwardActionCount:    v.StateValue.ForwardActionCount,
-				RightActionCount:      v.StateValue.RightActionCount,
-				BackActionCount:       v.StateValue.BackActionCount,
-				LeftActionCount:       v.StateValue.LeftActionCount,
-				ConditionActionCount:  v.StateValue.ConditionActionCount,
+				CommandCount:          history.StateValue.CommandCount,
+				ForwardCommandCount:   history.StateValue.ForwardCommandCount,
+				RightCommandCount:     history.StateValue.RightCommandCount,
+				BackCommandCount:      history.StateValue.BackCommandCount,
+				LeftCommandCount:      history.StateValue.LeftCommandCount,
+				ConditionCommandCount: history.StateValue.ConditionCommandCount,
+				ActionCount:           history.StateValue.ActionCount,
+				ForwardActionCount:    history.StateValue.ForwardActionCount,
+				RightActionCount:      history.StateValue.RightActionCount,
+				BackActionCount:       history.StateValue.BackActionCount,
+				LeftActionCount:       history.StateValue.LeftActionCount,
+				ConditionActionCount:  history.StateValue.ConditionActionCount,
 			})
 			if txErr != nil {
 				return txErr
@@ -65,7 +65,7 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg en
 
 			playHistory.StateValue = stateValue
 
-			for _, rule := range v.Rules {
+			for _, rule := range history.Rules {
 				ruleHistory, txErr := store.PlayHistoryRepo.CreateRuleHistory(ctx, entity.CreateRuleHistoryParams{
 					PlayHistoryID:   playHistory.ID,
 					MapConfigRuleID: rule.MapConfigRuleID,
@@ -76,6 +76,37 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg en
 				}
 
 				playHistory.Rules = append(playHistory.Rules, ruleHistory)
+			}
+
+			nodeIndexMap := make(map[int]int64)
+			for _, node := range history.CommandNodes {
+				commandNode, txErr := store.PlayHistoryRepo.CreateCommandNode(ctx, entity.CreateCommandNodeParams{
+					PlayHistoryID: playHistory.ID,
+					Type:          node.Type,
+					InGamePosition: entity.Vector2Float{
+						X: node.InGamePosition.X,
+						Y: node.InGamePosition.Y,
+					},
+				})
+				if txErr != nil {
+					return txErr
+				}
+
+				nodeIndexMap[node.NodeIndex] = commandNode.ID
+				playHistory.CommandNodes = append(playHistory.CommandNodes, commandNode)
+			}
+
+			for _, edge := range history.CommandEdges {
+				commandEdge, txErr := store.PlayHistoryRepo.CreateCommandEdge(ctx, entity.CreateCommandEdgeParams{
+					SourceNodeID:      nodeIndexMap[edge.SourceNodeIndex],
+					DestinationNodeID: nodeIndexMap[edge.DestinationIndex],
+					Type:              edge.Type,
+				})
+				if txErr != nil {
+					return txErr
+				}
+
+				playHistory.CommandEdges = append(playHistory.CommandEdges, commandEdge)
 			}
 
 			gameSession.GameHistory = append(gameSession.GameHistory, playHistory)

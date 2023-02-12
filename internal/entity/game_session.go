@@ -44,6 +44,8 @@ type PlayHistory struct {
 	SubmitDatetime  time.Time                `json:"submit_datetime"`
 	StateValue      *StateValue              `json:"state_value"`
 	Rules           []*RuleHistory           `json:"rules"`
+	CommandNodes    []*CommandNode           `json:"command_nodes"`
+	CommandEdges    []*CommandEdge           `json:"command_edges"`
 }
 
 type PlayHistoryRepository interface {
@@ -52,6 +54,8 @@ type PlayHistoryRepository interface {
 	CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*PlayHistory, error)
 	CreateRuleHistory(ctx context.Context, arg CreateRuleHistoryParams) (*RuleHistory, error)
 	CreateStateValue(ctx context.Context, arg CreateStateValueParams) (*StateValue, error)
+	CreateCommandNode(ctx context.Context, arg CreateCommandNodeParams) (*CommandNode, error)
+	CreateCommandEdge(ctx context.Context, arg CreateCommandEdgeParams) (*CommandEdge, error)
 }
 
 type CreatePlayHistoryParams struct {
@@ -87,6 +91,18 @@ type CreateStateValueParams struct {
 	ConditionActionCount  int
 }
 
+type CreateCommandNodeParams struct {
+	PlayHistoryID  int64
+	Type           sqlc_generated.CommandNodeType
+	InGamePosition Vector2Float
+}
+
+type CreateCommandEdgeParams struct {
+	SourceNodeID      int64
+	DestinationNodeID int64
+	Type              sqlc_generated.CommandEdgeType
+}
+
 type RuleHistory struct {
 	MapConfigRuleID int64    `json:"map_configuration_rule_id"`
 	PlayHistoryID   int64    `json:"play_history_id"`
@@ -107,4 +123,17 @@ type StateValue struct {
 	BackActionCount       int `json:"back_action_count"`
 	LeftActionCount       int `json:"left_action_count"`
 	ConditionActionCount  int `json:"condition_action_count"`
+}
+
+type CommandNode struct {
+	ID             int64                          `json:"command_node_id"`
+	PlayHistoryID  int64                          `json:"-"`
+	Type           sqlc_generated.CommandNodeType `json:"type"`
+	InGamePosition Vector2Float                   `json:"in_game_position"`
+}
+
+type CommandEdge struct {
+	SourceNodeID      int64                          `json:"source_node_id"`
+	DestinationNodeID int64                          `json:"destination_node_id"`
+	Type              sqlc_generated.CommandEdgeType `json:"type"`
 }

@@ -12,6 +12,56 @@ import (
 	"github.com/lib/pq"
 )
 
+const createCommandEdge = `-- name: CreateCommandEdge :one
+INSERT INTO command_edge (source_node_id, destination_node_id, type)
+VALUES ($1, $2, $3)
+RETURNING source_node_id, destination_node_id, type
+`
+
+type CreateCommandEdgeParams struct {
+	SourceNodeID      int64           `json:"source_node_id"`
+	DestinationNodeID int64           `json:"destination_node_id"`
+	Type              CommandEdgeType `json:"type"`
+}
+
+func (q *Queries) CreateCommandEdge(ctx context.Context, arg CreateCommandEdgeParams) (*CommandEdge, error) {
+	row := q.db.QueryRowContext(ctx, createCommandEdge, arg.SourceNodeID, arg.DestinationNodeID, arg.Type)
+	var i CommandEdge
+	err := row.Scan(&i.SourceNodeID, &i.DestinationNodeID, &i.Type)
+	return &i, err
+}
+
+const createCommandNode = `-- name: CreateCommandNode :one
+INSERT INTO command_node (play_history_id, type, in_game_position_x, in_game_position_y)
+VALUES ($1, $2, $3, $4)
+RETURNING id, play_history_id, type, in_game_position_x, in_game_position_y
+`
+
+type CreateCommandNodeParams struct {
+	PlayHistoryID   int64           `json:"play_history_id"`
+	Type            CommandNodeType `json:"type"`
+	InGamePositionX float32         `json:"in_game_position_x"`
+	InGamePositionY float32         `json:"in_game_position_y"`
+}
+
+func (q *Queries) CreateCommandNode(ctx context.Context, arg CreateCommandNodeParams) (*CommandNode, error) {
+	row := q.db.QueryRowContext(ctx, createCommandNode,
+		arg.PlayHistoryID,
+		arg.Type,
+		arg.InGamePositionX,
+		arg.InGamePositionY,
+	)
+	var i CommandNode
+	err := row.Scan(
+		&i.ID,
+		&i.PlayHistoryID,
+		&i.Type,
+		&i.InGamePositionX,
+		&i.InGamePositionY,
+	)
+	return &i, err
+}
+
 const createPlayHistory = `-- name: CreatePlayHistory :one
 INSERT INTO play_history (game_session_id, action_step, number_of_command, is_finited, is_completed, command_medal,
                           action_medal, submit_datetime)

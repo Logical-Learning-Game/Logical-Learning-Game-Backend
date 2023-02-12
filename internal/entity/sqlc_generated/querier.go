@@ -9,6 +9,8 @@ import (
 )
 
 type Querier interface {
+	CreateCommandEdge(ctx context.Context, arg CreateCommandEdgeParams) (*CommandEdge, error)
+	CreateCommandNode(ctx context.Context, arg CreateCommandNodeParams) (*CommandNode, error)
 	CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*GameSession, error)
 	CreateLoginLog(ctx context.Context, playerID string) error
 	CreateOrUpdatePlayer(ctx context.Context, arg CreateOrUpdatePlayerParams) error
