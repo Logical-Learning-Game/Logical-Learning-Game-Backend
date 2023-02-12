@@ -3,24 +3,23 @@ package service
 import (
 	"context"
 	"llg_backend/internal/entity"
-	"llg_backend/internal/repository"
 )
 
 type playerStatisticService struct {
-	unitOfWork repository.UnitOfWork
+	unitOfWork entity.UnitOfWork
 }
 
-func NewPlayerStatisticService(unitOfWork repository.UnitOfWork) PlayerStatisticService {
+func NewPlayerStatisticService(unitOfWork entity.UnitOfWork) entity.PlayerStatisticService {
 	return &playerStatisticService{
 		unitOfWork: unitOfWork,
 	}
 }
 
-func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg CreateSessionHistoryParams) (*entity.PlayerGameSession, error) {
-	var resultGameSession *entity.PlayerGameSession
+func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg entity.CreateSessionHistoryParams) (*entity.GameSession, error) {
+	var resultGameSession *entity.GameSession
 
-	err := s.unitOfWork.Do(ctx, func(store *repository.UnitOfWorkStore) error {
-		gameSession, txErr := store.GameSessionRepo.CreateGameSession(ctx, repository.CreateGameSessionParams{
+	err := s.unitOfWork.Do(ctx, func(store *entity.UnitOfWorkStore) error {
+		gameSession, txErr := store.GameSessionRepo.CreateGameSession(ctx, entity.CreateGameSessionParams{
 			PlayerID:           arg.PlayerID,
 			MapConfigurationID: arg.MapConfigurationID,
 			StartDatetime:      arg.StartDatetime,
@@ -31,8 +30,8 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg Cr
 		}
 
 		for _, v := range arg.GameHistories {
-			playHistory, txErr := store.PlayHistoryRepo.CreatePlayHistory(ctx, repository.CreatePlayHistoryParams{
-				GameSessionID:   gameSession.GameSesssionID,
+			playHistory, txErr := store.PlayHistoryRepo.CreatePlayHistory(ctx, entity.CreatePlayHistoryParams{
+				GameSessionID:   gameSession.ID,
 				ActionStep:      v.ActionStep,
 				NumberOfCommand: v.NumberOfCommand,
 				IsFinited:       v.IsFinited,
@@ -45,7 +44,7 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg Cr
 				return txErr
 			}
 
-			stateValue, txErr := store.PlayHistoryRepo.CreateStateValue(ctx, repository.CreateStateValueParams{
+			stateValue, txErr := store.PlayHistoryRepo.CreateStateValue(ctx, entity.CreateStateValueParams{
 				PlayHistoryID:         playHistory.ID,
 				CommandCount:          v.StateValue.CommandCount,
 				ForwardCommandCount:   v.StateValue.ForwardCommandCount,
@@ -67,7 +66,7 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg Cr
 			playHistory.StateValue = stateValue
 
 			for _, rule := range v.Rules {
-				ruleHistory, txErr := store.PlayHistoryRepo.CreateRuleHistory(ctx, repository.CreateRuleHistoryParams{
+				ruleHistory, txErr := store.PlayHistoryRepo.CreateRuleHistory(ctx, entity.CreateRuleHistoryParams{
 					PlayHistoryID:   playHistory.ID,
 					MapConfigRuleID: rule.MapConfigRuleID,
 					IsPass:          rule.IsPass,

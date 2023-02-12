@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"llg_backend/internal/entity"
 	"llg_backend/internal/entity/sqlc_generated"
 	"strings"
 )
@@ -11,7 +12,7 @@ type playerRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewPlayerRepository(querier sqlc_generated.Querier) PlayerRepository {
+func NewPlayerRepository(querier sqlc_generated.Querier) entity.PlayerRepository {
 	return &playerRepository{
 		Querier: querier,
 	}

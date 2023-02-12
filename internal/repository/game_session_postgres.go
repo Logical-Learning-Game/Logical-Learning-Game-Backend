@@ -11,13 +11,13 @@ type gameSessionRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewGameSessionRepository(querier sqlc_generated.Querier) GameSessionRepository {
+func NewGameSessionRepository(querier sqlc_generated.Querier) entity.GameSessionRepository {
 	return &gameSessionRepository{
 		Querier: querier,
 	}
 }
 
-func (r gameSessionRepository) CreateGameSession(ctx context.Context, arg CreateGameSessionParams) (*entity.PlayerGameSession, error) {
+func (r gameSessionRepository) CreateGameSession(ctx context.Context, arg entity.CreateGameSessionParams) (*entity.GameSession, error) {
 	endDatetimeArg := sql.NullTime{
 		Time:  arg.EndDatetime,
 		Valid: true,
@@ -39,8 +39,8 @@ func (r gameSessionRepository) CreateGameSession(ctx context.Context, arg Create
 		return nil, err
 	}
 
-	gameSession := &entity.PlayerGameSession{
-		GameSesssionID:     gameSessionRow.ID,
+	gameSession := &entity.GameSession{
+		ID:                 gameSessionRow.ID,
 		PlayerID:           gameSessionRow.PlayerID,
 		MapConfigurationID: gameSessionRow.MapConfigurationID,
 		StartDatetime:      gameSessionRow.StartDatetime,

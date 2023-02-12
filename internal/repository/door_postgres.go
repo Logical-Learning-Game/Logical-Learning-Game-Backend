@@ -10,7 +10,7 @@ type doorRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewDoorRepository(querier sqlc_generated.Querier) DoorRepository {
+func NewDoorRepository(querier sqlc_generated.Querier) entity.DoorRepository {
 	return &doorRepository{
 		Querier: querier,
 	}

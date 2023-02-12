@@ -1,20 +1,20 @@
 package v1
 
 import (
+	"llg_backend/internal/entity"
 	"llg_backend/internal/pkg/httputil"
-	"llg_backend/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type PlayerController struct {
-	playerService          service.PlayerService
-	worldService           service.WorldService
-	playerStatisticService service.PlayerStatisticService
+	playerService          entity.PlayerService
+	worldService           entity.WorldService
+	playerStatisticService entity.PlayerStatisticService
 }
 
-func NewPlayerController(playerService service.PlayerService, worldService service.WorldService, playerStatisticService service.PlayerStatisticService) *PlayerController {
+func NewPlayerController(playerService entity.PlayerService, worldService entity.WorldService, playerStatisticService entity.PlayerStatisticService) *PlayerController {
 	return &PlayerController{
 		playerService:          playerService,
 		worldService:           worldService,
@@ -74,7 +74,7 @@ func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
 }
 
 func (c *PlayerController) CreateSessionHistory(ctx *gin.Context) {
-	var req service.CreateSessionHistoryParams
+	var req entity.CreateSessionHistoryParams
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return

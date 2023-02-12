@@ -10,13 +10,13 @@ type playHistoryRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewPlayHistoryRepository(querier sqlc_generated.Querier) PlayHistoryRepository {
+func NewPlayHistoryRepository(querier sqlc_generated.Querier) entity.PlayHistoryRepository {
 	return &playHistoryRepository{
 		Querier: querier,
 	}
 }
 
-func (r playHistoryRepository) CreatePlayHistory(ctx context.Context, arg CreatePlayHistoryParams) (*entity.PlayHistory, error) {
+func (r playHistoryRepository) CreatePlayHistory(ctx context.Context, arg entity.CreatePlayHistoryParams) (*entity.PlayHistory, error) {
 	newCreatedArg := sqlc_generated.CreatePlayHistoryParams{
 		GameSessionID:   arg.GameSessionID,
 		ActionStep:      int32(arg.ActionStep),
@@ -49,7 +49,7 @@ func (r playHistoryRepository) CreatePlayHistory(ctx context.Context, arg Create
 	return playHistory, nil
 }
 
-func (r playHistoryRepository) CreateRuleHistory(ctx context.Context, arg CreateRuleHistoryParams) (*entity.RuleHistory, error) {
+func (r playHistoryRepository) CreateRuleHistory(ctx context.Context, arg entity.CreateRuleHistoryParams) (*entity.RuleHistory, error) {
 	newCreatedArg := sqlc_generated.CreateRuleHistoryParams{
 		PlayHistoryID:          arg.PlayHistoryID,
 		MapConfigurationRuleID: arg.MapConfigRuleID,
@@ -71,7 +71,7 @@ func (r playHistoryRepository) CreateRuleHistory(ctx context.Context, arg Create
 	return ruleHistory, nil
 }
 
-func (r playHistoryRepository) CreateStateValue(ctx context.Context, arg CreateStateValueParams) (*entity.StateValue, error) {
+func (r playHistoryRepository) CreateStateValue(ctx context.Context, arg entity.CreateStateValueParams) (*entity.StateValue, error) {
 	newCreatedArg := sqlc_generated.CreateStateValueParams{
 		PlayHistoryID:         arg.PlayHistoryID,
 		CommandCount:          int32(arg.CommandCount),

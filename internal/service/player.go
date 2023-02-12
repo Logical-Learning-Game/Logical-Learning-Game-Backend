@@ -2,16 +2,16 @@ package service
 
 import (
 	"context"
-	"llg_backend/internal/repository"
+	"llg_backend/internal/entity"
 	"llg_backend/pkg/logger"
 	"strings"
 )
 
 type playerService struct {
-	playerRepo repository.PlayerRepository
+	playerRepo entity.PlayerRepository
 }
 
-func NewPlayerService(playerRepo repository.PlayerRepository) PlayerService {
+func NewPlayerService(playerRepo entity.PlayerRepository) entity.PlayerService {
 	return &playerService{
 		playerRepo: playerRepo,
 	}
@@ -26,12 +26,12 @@ func (s *playerService) CreateLoginLog(ctx context.Context, playerID string) err
 }
 
 type playerServiceWithLog struct {
-	PlayerService
+	entity.PlayerService
 
 	log logger.Logger
 }
 
-func NewPlayerServiceWithLog(playerService PlayerService, log logger.Logger) PlayerService {
+func NewPlayerServiceWithLog(playerService entity.PlayerService, log logger.Logger) entity.PlayerService {
 	return &playerServiceWithLog{
 		PlayerService: playerService,
 		log:           log,

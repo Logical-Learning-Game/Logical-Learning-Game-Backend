@@ -3,15 +3,14 @@ package service
 import (
 	"context"
 	"llg_backend/internal/entity"
-	"llg_backend/internal/repository"
 )
 
 type worldService struct {
-	mapConfigService MapConfigurationService
-	worldRepo        repository.WorldRepository
+	mapConfigService entity.MapConfigurationService
+	worldRepo        entity.WorldRepository
 }
 
-func NewWorldService(mapConfigService MapConfigurationService, worldRepo repository.WorldRepository) WorldService {
+func NewWorldService(mapConfigService entity.MapConfigurationService, worldRepo entity.WorldRepository) entity.WorldService {
 	return &worldService{
 		mapConfigService: mapConfigService,
 		worldRepo:        worldRepo,

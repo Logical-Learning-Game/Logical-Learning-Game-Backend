@@ -10,7 +10,7 @@ type itemRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewItemRepository(querier sqlc_generated.Querier) ItemRepository {
+func NewItemRepository(querier sqlc_generated.Querier) entity.ItemRepository {
 	return &itemRepository{
 		Querier: querier,
 	}

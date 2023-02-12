@@ -1,24 +1,10 @@
-package service
+package entity
 
 import (
 	"context"
-	"llg_backend/internal/entity"
 	"llg_backend/internal/entity/sqlc_generated"
 	"time"
 )
-
-type PlayerService interface {
-	CreateOrUpdatePlayerInformation(ctx context.Context, playerID, email, name string) error
-	CreateLoginLog(ctx context.Context, playerID string) error
-}
-
-type MapConfigurationService interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error)
-}
-
-type WorldService interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.World, error)
-}
 
 type GameHistoryParams struct {
 	ActionStep      int                      `json:"action_step"`
@@ -61,5 +47,5 @@ type CreateSessionHistoryParams struct {
 }
 
 type PlayerStatisticService interface {
-	CreateSessionHistory(ctx context.Context, arg CreateSessionHistoryParams) (*entity.PlayerGameSession, error)
+	CreateSessionHistory(ctx context.Context, arg CreateSessionHistoryParams) (*GameSession, error)
 }

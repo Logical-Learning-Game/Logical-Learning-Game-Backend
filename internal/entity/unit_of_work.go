@@ -1,4 +1,6 @@
-package repository
+package entity
+
+import "context"
 
 type UnitOfWorkStore struct {
 	DoorRepo        DoorRepository
@@ -10,3 +12,9 @@ type UnitOfWorkStore struct {
 	RuleRepo        RuleRepository
 	WorldRepo       WorldRepository
 }
+
+type UnitOfWork interface {
+	Do(ctx context.Context, fn UnitOfWorkBlock) error
+}
+
+type UnitOfWorkBlock func(*UnitOfWorkStore) error

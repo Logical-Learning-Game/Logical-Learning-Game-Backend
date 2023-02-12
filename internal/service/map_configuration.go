@@ -3,22 +3,21 @@ package service
 import (
 	"context"
 	"llg_backend/internal/entity"
-	"llg_backend/internal/repository"
 )
 
 type mapConfigurationService struct {
-	mapConfigRepo repository.MapConfigurationRepository
-	itemRepo      repository.ItemRepository
-	doorRepo      repository.DoorRepository
-	ruleRepo      repository.RuleRepository
+	mapConfigRepo entity.MapConfigurationRepository
+	itemRepo      entity.ItemRepository
+	doorRepo      entity.DoorRepository
+	ruleRepo      entity.RuleRepository
 }
 
 func NewMapConfigurationService(
-	mapConfigRepo repository.MapConfigurationRepository,
-	itemRepo repository.ItemRepository,
-	doorRepo repository.DoorRepository,
-	ruleRepo repository.RuleRepository,
-) MapConfigurationService {
+	mapConfigRepo entity.MapConfigurationRepository,
+	itemRepo entity.ItemRepository,
+	doorRepo entity.DoorRepository,
+	ruleRepo entity.RuleRepository,
+) entity.MapConfigurationService {
 	return &mapConfigurationService{
 		mapConfigRepo: mapConfigRepo,
 		itemRepo:      itemRepo,

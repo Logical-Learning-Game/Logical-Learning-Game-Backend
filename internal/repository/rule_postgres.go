@@ -10,7 +10,7 @@ type ruleRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewRuleRepository(querier sqlc_generated.Querier) RuleRepository {
+func NewRuleRepository(querier sqlc_generated.Querier) entity.RuleRepository {
 	return &ruleRepository{
 		Querier: querier,
 	}

@@ -11,7 +11,7 @@ type mapConfigurationRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewMapConfigurationRepository(querier sqlc_generated.Querier) MapConfigurationRepository {
+func NewMapConfigurationRepository(querier sqlc_generated.Querier) entity.MapConfigurationRepository {
 	return &mapConfigurationRepository{
 		Querier: querier,
 	}

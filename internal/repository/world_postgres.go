@@ -10,7 +10,7 @@ type worldRepository struct {
 	sqlc_generated.Querier
 }
 
-func NewWorldRepository(querier sqlc_generated.Querier) WorldRepository {
+func NewWorldRepository(querier sqlc_generated.Querier) entity.WorldRepository {
 	return &worldRepository{
 		Querier: querier,
 	}

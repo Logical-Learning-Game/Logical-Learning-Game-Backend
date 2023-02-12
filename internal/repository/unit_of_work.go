@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"llg_backend/internal/entity"
 	"llg_backend/internal/entity/sqlc_generated"
 )
 
@@ -11,11 +12,11 @@ type unitOfWork struct {
 	db *sql.DB
 }
 
-func NewUnitOfWork(db *sql.DB) UnitOfWork {
+func NewUnitOfWork(db *sql.DB) entity.UnitOfWork {
 	return &unitOfWork{db: db}
 }
 
-func (u unitOfWork) Do(ctx context.Context, fn UnitOfWorkBlock) error {
+func (u unitOfWork) Do(ctx context.Context, fn entity.UnitOfWorkBlock) error {
 	tx, err := u.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -23,7 +24,7 @@ func (u unitOfWork) Do(ctx context.Context, fn UnitOfWorkBlock) error {
 
 	q := sqlc_generated.New(tx)
 
-	uows := &UnitOfWorkStore{
+	uows := &entity.UnitOfWorkStore{
 		DoorRepo:        NewDoorRepository(q),
 		GameSessionRepo: NewGameSessionRepository(q),
 		ItemRepo:        NewItemRepository(q),
