@@ -67,6 +67,7 @@ func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
 	playerWorlds, err := c.worldService.ListFromPlayerID(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
 	}
 
 	ctx.JSON(http.StatusOK, playerWorlds)
