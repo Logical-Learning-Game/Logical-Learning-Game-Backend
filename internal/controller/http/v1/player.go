@@ -74,11 +74,15 @@ func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
 }
 
 func (c *PlayerController) CreateSessionHistory(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
 	var req entity.CreateSessionHistoryParams
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
 	}
+
+	req.PlayerID = playerID
 
 	gameSession, err := c.playerStatisticService.CreateSessionHistory(ctx, req)
 	if err != nil {

@@ -39,7 +39,7 @@ type RuleParams struct {
 }
 
 type CreateSessionHistoryParams struct {
-	PlayerID           string               `json:"player_id"`
+	PlayerID           string               `json:"-"`
 	MapConfigurationID int64                `json:"map_configuration_id"`
 	StartDatetime      time.Time            `json:"start_datetime"`
 	EndDatetime        time.Time            `json:"end_datetime"`
