@@ -405,25 +405,20 @@ type LoginLog struct {
 	LoginAt  time.Time `json:"login_at"`
 }
 
-type Map struct {
-	ID                   int64        `json:"id"`
-	TileArray            []int32      `json:"tile_array"`
-	Height               int32        `json:"height"`
-	Width                int32        `json:"width"`
-	StartPlayerDirection MapDirection `json:"start_player_direction"`
-	StartPlayerPositionX int32        `json:"start_player_position_x"`
-	StartPlayerPositionY int32        `json:"start_player_position_y"`
-	GoalPositionX        int32        `json:"goal_position_x"`
-	GoalPositionY        int32        `json:"goal_position_y"`
-}
-
 type MapConfiguration struct {
 	ID                         int64          `json:"id"`
 	WorldID                    int64          `json:"world_id"`
-	MapID                      int64          `json:"map_id"`
 	ConfigName                 string         `json:"config_name"`
 	MapImagePath               sql.NullString `json:"map_image_path"`
 	Difficulty                 MapDifficulty  `json:"difficulty"`
+	TileArray                  []int32        `json:"tile_array"`
+	Height                     int32          `json:"height"`
+	Width                      int32          `json:"width"`
+	StartPlayerDirection       MapDirection   `json:"start_player_direction"`
+	StartPlayerPositionX       int32          `json:"start_player_position_x"`
+	StartPlayerPositionY       int32          `json:"start_player_position_y"`
+	GoalPositionX              int32          `json:"goal_position_x"`
+	GoalPositionY              int32          `json:"goal_position_y"`
 	StarRequirement            int32          `json:"star_requirement"`
 	LeastSolvableCommandGold   int32          `json:"least_solvable_command_gold"`
 	LeastSolvableCommandSilver int32          `json:"least_solvable_command_silver"`

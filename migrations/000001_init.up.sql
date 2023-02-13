@@ -19,19 +19,6 @@ CREATE TYPE map_direction AS ENUM
         'right'
         );
 
-CREATE TABLE IF NOT EXISTS map
-(
-    id                      BIGSERIAL PRIMARY KEY,
-    tile_array              INTEGER[]     NOT NULL,
-    height                  INTEGER       NOT NULL,
-    width                   INTEGER       NOT NULL,
-    start_player_direction  map_direction NOT NULL,
-    start_player_position_x INTEGER       NOT NULL,
-    start_player_position_y INTEGER       NOT NULL,
-    goal_position_x         INTEGER       NOT NULL,
-    goal_position_y         INTEGER       NOT NULL
-);
-
 CREATE TYPE item_type AS ENUM ('key_a', 'key_b', 'key_c');
 
 CREATE TABLE IF NOT EXISTS item
@@ -64,10 +51,17 @@ CREATE TABLE IF NOT EXISTS map_configuration
 (
     id                            BIGSERIAL PRIMARY KEY,
     world_id                      BIGINT         NOT NULL REFERENCES world (id),
-    map_id                        BIGINT         NOT NULL REFERENCES map (id),
     config_name                   VARCHAR(255)   NOT NULL,
     map_image_path                VARCHAR(255),
     difficulty                    map_difficulty NOT NULL,
+    tile_array                    INTEGER[]      NOT NULL,
+    height                        INTEGER        NOT NULL,
+    width                         INTEGER        NOT NULL,
+    start_player_direction        map_direction  NOT NULL,
+    start_player_position_x       INTEGER        NOT NULL,
+    start_player_position_y       INTEGER        NOT NULL,
+    goal_position_x               INTEGER        NOT NULL,
+    goal_position_y               INTEGER        NOT NULL,
     star_requirement              INTEGER        NOT NULL,
     least_solvable_command_gold   INTEGER        NOT NULL,
     least_solvable_command_silver INTEGER        NOT NULL,
