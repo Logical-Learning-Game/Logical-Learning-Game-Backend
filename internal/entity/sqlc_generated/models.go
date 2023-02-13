@@ -447,7 +447,6 @@ type MapConfigurationForPlayer struct {
 	ID                 int64  `json:"id"`
 	MapConfigurationID int64  `json:"map_configuration_id"`
 	PlayerID           string `json:"player_id"`
-	IsPass             bool   `json:"is_pass"`
 }
 
 type MapConfigurationItem struct {

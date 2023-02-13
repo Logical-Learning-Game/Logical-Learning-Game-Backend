@@ -27,7 +27,7 @@ func (r worldRepository) ListFromMapConfigurationIDs(ctx context.Context, mapCon
 		playerWorlds = append(playerWorlds, &entity.World{
 			ID:   row.WorldID,
 			Name: row.Name,
-			Maps: make([]*entity.PlayerStatInMap, 0),
+			Maps: make([]*entity.MapConfiguration, 0),
 		})
 	}
 

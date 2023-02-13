@@ -18,7 +18,7 @@ type MapConfiguration struct {
 	BadgeRequirement
 
 	ID                   int64                        `json:"map_config_id"`
-	WorldID              int64                        `json:"world_id"`
+	WorldID              int64                        `json:"-"`
 	ConfigName           string                       `json:"config_name"`
 	Map                  [][]int                      `json:"map"`
 	Height               int                          `json:"height"`
@@ -35,11 +35,11 @@ type MapConfiguration struct {
 }
 
 type MapConfigurationRepository interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*PlayerStatInMap, error)
+	ListFromPlayerID(ctx context.Context, playerID string) ([]*MapConfiguration, error)
 }
 
 type MapConfigurationService interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*PlayerStatInMap, error)
+	ListFromPlayerID(ctx context.Context, playerID string) ([]*MapConfiguration, error)
 }
 
 type MapItem struct {
@@ -79,9 +79,9 @@ type RuleRepository interface {
 }
 
 type World struct {
-	ID   int64              `json:"world_id"`
-	Name string             `json:"world_name"`
-	Maps []*PlayerStatInMap `json:"maps"`
+	ID   int64               `json:"world_id"`
+	Name string              `json:"world_name"`
+	Maps []*MapConfiguration `json:"maps"`
 }
 
 type WorldRepository interface {

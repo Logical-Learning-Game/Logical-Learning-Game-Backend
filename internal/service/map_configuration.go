@@ -26,7 +26,7 @@ func NewMapConfigurationService(
 	}
 }
 
-func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerStatInMap, error) {
+func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.MapConfiguration, error) {
 	mapConfigs, err := s.mapConfigRepo.ListFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err
@@ -35,8 +35,8 @@ func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID 
 	mapConfigIDs := make([]int64, 0)
 	mapConfigMaps := make(map[int64]*entity.MapConfiguration)
 	for _, conf := range mapConfigs {
-		mapConfigIDs = append(mapConfigIDs, conf.MapConfig.ID)
-		mapConfigMaps[conf.MapConfig.ID] = conf.MapConfig
+		mapConfigIDs = append(mapConfigIDs, conf.ID)
+		mapConfigMaps[conf.ID] = conf
 	}
 
 	mapItems, err := s.itemRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)

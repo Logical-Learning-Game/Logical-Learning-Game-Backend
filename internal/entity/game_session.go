@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-type PlayerStatInMap struct {
-	MapConfig  *MapConfiguration `json:"map"`
-	IsPass     bool              `json:"is_pass"`
-	TopHistory []*PlayHistory    `json:"top_histories"`
-}
-
 type GameSession struct {
 	ID                 int64          `json:"game_session_id"`
 	PlayerID           string         `json:"player_id"`
