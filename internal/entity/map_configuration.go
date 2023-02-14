@@ -14,6 +14,12 @@ type BadgeRequirement struct {
 	LeastSolvableActionBronze  int `json:"least_solvable_action_bronze"`
 }
 
+type PlayerMapConfiguration struct {
+	MapConfiguration *MapConfiguration `json:"map_configuration"`
+	IsPass           bool              `json:"is_pass"`
+	TopSubmitHistory *PlayHistory      `json:"top_submit_history"`
+}
+
 type MapConfiguration struct {
 	BadgeRequirement
 
@@ -35,11 +41,11 @@ type MapConfiguration struct {
 }
 
 type MapConfigurationRepository interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*MapConfiguration, error)
+	ListFromPlayerID(ctx context.Context, playerID string) ([]*PlayerMapConfiguration, error)
 }
 
 type MapConfigurationService interface {
-	ListFromPlayerID(ctx context.Context, playerID string) ([]*MapConfiguration, error)
+	ListFromPlayerID(ctx context.Context, playerID string) ([]*PlayerMapConfiguration, error)
 }
 
 type MapItem struct {
@@ -79,9 +85,9 @@ type RuleRepository interface {
 }
 
 type World struct {
-	ID   int64               `json:"world_id"`
-	Name string              `json:"world_name"`
-	Maps []*MapConfiguration `json:"maps"`
+	ID   int64                     `json:"world_id"`
+	Name string                    `json:"world_name"`
+	Maps []*PlayerMapConfiguration `json:"maps"`
 }
 
 type WorldRepository interface {

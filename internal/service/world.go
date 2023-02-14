@@ -25,7 +25,7 @@ func (s worldService) ListFromPlayerID(ctx context.Context, playerID string) ([]
 
 	mapConfigIDs := make([]int64, 0)
 	for _, conf := range mapConfigs {
-		mapConfigIDs = append(mapConfigIDs, conf.ID)
+		mapConfigIDs = append(mapConfigIDs, conf.MapConfiguration.ID)
 	}
 
 	worlds, err := s.worldRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)
@@ -39,7 +39,7 @@ func (s worldService) ListFromPlayerID(ctx context.Context, playerID string) ([]
 	}
 
 	for _, conf := range mapConfigs {
-		if world, found := worldMap[conf.WorldID]; found {
+		if world, found := worldMap[conf.MapConfiguration.WorldID]; found {
 			world.Maps = append(world.Maps, conf)
 		}
 	}

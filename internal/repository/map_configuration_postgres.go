@@ -17,13 +17,13 @@ func NewMapConfigurationRepository(querier sqlc_generated.Querier) entity.MapCon
 	}
 }
 
-func (r mapConfigurationRepository) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.MapConfiguration, error) {
+func (r mapConfigurationRepository) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerMapConfiguration, error) {
 	mapConfigRows, err := r.Querier.GetMapConfigFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err
 	}
 
-	playerMaps := make([]*entity.MapConfiguration, 0)
+	playerMaps := make([]*entity.PlayerMapConfiguration, 0)
 	for _, row := range mapConfigRows {
 
 		intConvertionSlice := make([]int, 0)
@@ -35,7 +35,7 @@ func (r mapConfigurationRepository) ListFromPlayerID(ctx context.Context, player
 		mapWidth := int(row.MapWidth)
 		twoDimensionConvertionSlice := utility.TwoDimensionSlice[int](intConvertionSlice, mapHeight, mapWidth)
 
-		playerStatInMap := &entity.MapConfiguration{
+		mapConfiguration := &entity.MapConfiguration{
 			BadgeRequirement: entity.BadgeRequirement{
 				LeastSolvableCommandGold:   int(row.LeastSolvableCommandGold),
 				LeastSolvableCommandSilver: int(row.LeastSolvableCommandSilver),
@@ -66,8 +66,14 @@ func (r mapConfigurationRepository) ListFromPlayerID(ctx context.Context, player
 			Doors:           make([]*entity.MapDoor, 0),
 			Rules:           make([]*entity.MapRule, 0),
 		}
-			
-		playerMaps = append(playerMaps, playerStatInMap)
+
+		playerMapConfiguration := &entity.PlayerMapConfiguration{
+			MapConfiguration: mapConfiguration,
+			IsPass:           row.IsPass,
+			TopSubmitHistory: nil,
+		}
+
+		playerMaps = append(playerMaps, playerMapConfiguration)
 	}
 
 	return playerMaps, nil

@@ -26,17 +26,17 @@ func NewMapConfigurationService(
 	}
 }
 
-func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.MapConfiguration, error) {
+func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerMapConfiguration, error) {
 	mapConfigs, err := s.mapConfigRepo.ListFromPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err
 	}
 
 	mapConfigIDs := make([]int64, 0)
-	mapConfigMaps := make(map[int64]*entity.MapConfiguration)
+	mapConfigMaps := make(map[int64]*entity.PlayerMapConfiguration)
 	for _, conf := range mapConfigs {
-		mapConfigIDs = append(mapConfigIDs, conf.ID)
-		mapConfigMaps[conf.ID] = conf
+		mapConfigIDs = append(mapConfigIDs, conf.MapConfiguration.ID)
+		mapConfigMaps[conf.MapConfiguration.ID] = conf
 	}
 
 	mapItems, err := s.itemRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)
@@ -45,8 +45,8 @@ func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID 
 	}
 
 	for _, item := range mapItems {
-		if mapConfig, found := mapConfigMaps[item.MapConfigID]; found {
-			mapConfig.Items = append(mapConfig.Items, item)
+		if playerMap, found := mapConfigMaps[item.MapConfigID]; found {
+			playerMap.MapConfiguration.Items = append(playerMap.MapConfiguration.Items, item)
 		}
 	}
 
@@ -56,8 +56,8 @@ func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID 
 	}
 
 	for _, door := range mapDoors {
-		if mapConfig, found := mapConfigMaps[door.MapConfigID]; found {
-			mapConfig.Doors = append(mapConfig.Doors, door)
+		if playerMap, found := mapConfigMaps[door.MapConfigID]; found {
+			playerMap.MapConfiguration.Doors = append(playerMap.MapConfiguration.Doors, door)
 		}
 	}
 
@@ -67,8 +67,8 @@ func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID 
 	}
 
 	for _, rule := range mapRules {
-		if mapConfig, found := mapConfigMaps[rule.MapConfigID]; found {
-			mapConfig.Rules = append(mapConfig.Rules, rule)
+		if playerMap, found := mapConfigMaps[rule.MapConfigID]; found {
+			playerMap.MapConfiguration.Rules = append(playerMap.MapConfiguration.Rules, rule)
 		}
 	}
 

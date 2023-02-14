@@ -19,7 +19,8 @@ SELECT map_conf.id     AS map_config_id,
        map_conf.least_solvable_command_bronze,
        map_conf.least_solvable_action_gold,
        map_conf.least_solvable_action_silver,
-       map_conf.least_solvable_action_bronze
+       map_conf.least_solvable_action_bronze,
+       map_player.is_pass
 FROM map_configuration_for_player AS map_player
          INNER JOIN map_configuration AS map_conf ON map_player.map_configuration_id = map_conf.id
          INNER JOIN world ON world.id = map_conf.world_id
