@@ -3,74 +3,56 @@ package service
 import (
 	"context"
 	"llg_backend/internal/entity"
+
+	"gorm.io/gorm"
 )
 
 type mapConfigurationService struct {
-	mapConfigRepo entity.MapConfigurationRepository
-	itemRepo      entity.ItemRepository
-	doorRepo      entity.DoorRepository
-	ruleRepo      entity.RuleRepository
+	db *gorm.DB
 }
 
-func NewMapConfigurationService(
-	mapConfigRepo entity.MapConfigurationRepository,
-	itemRepo entity.ItemRepository,
-	doorRepo entity.DoorRepository,
-	ruleRepo entity.RuleRepository,
-) entity.MapConfigurationService {
+func NewMapConfigurationService(db *gorm.DB) MapConfigurationService {
 	return &mapConfigurationService{
-		mapConfigRepo: mapConfigRepo,
-		itemRepo:      itemRepo,
-		doorRepo:      doorRepo,
-		ruleRepo:      ruleRepo,
+		db: db,
 	}
 }
 
-func (s mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.PlayerMapConfiguration, error) {
-	mapConfigs, err := s.mapConfigRepo.ListFromPlayerID(ctx, playerID)
-	if err != nil {
+func (s *mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.World, error) {
+	var mapConfigurationForPlayers []*entity.MapConfigurationForPlayer
+	result := s.db.WithContext(ctx).
+		Where(&entity.MapConfigurationForPlayer{PlayerID: playerID}).
+		Joins("MapConfiguration").
+		Preload("MapConfiguration.Rules").
+		Find(&mapConfigurationForPlayers)
+	if err := result.Error; err != nil {
 		return nil, err
 	}
 
-	mapConfigIDs := make([]int64, 0)
-	mapConfigMaps := make(map[int64]*entity.PlayerMapConfiguration)
-	for _, conf := range mapConfigs {
-		mapConfigIDs = append(mapConfigIDs, conf.MapConfiguration.ID)
-		mapConfigMaps[conf.MapConfiguration.ID] = conf
-	}
-
-	mapItems, err := s.itemRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, item := range mapItems {
-		if playerMap, found := mapConfigMaps[item.MapConfigID]; found {
-			playerMap.MapConfiguration.Items = append(playerMap.MapConfiguration.Items, item)
+	worldIDSet := make(map[int64]struct{})
+	worldIDs := make([]int64, 0, len(mapConfigurationForPlayers))
+	for _, v := range mapConfigurationForPlayers {
+		if _, found := worldIDSet[v.MapConfiguration.WorldID]; !found {
+			worldIDs = append(worldIDs, v.MapConfiguration.WorldID)
+			worldIDSet[v.MapConfiguration.WorldID] = struct{}{}
 		}
 	}
 
-	mapDoors, err := s.doorRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)
-	if err != nil {
+	var worlds []*entity.World
+	result = s.db.Find(&worlds, worldIDs)
+	if err := result.Error; err != nil {
 		return nil, err
 	}
 
-	for _, door := range mapDoors {
-		if playerMap, found := mapConfigMaps[door.MapConfigID]; found {
-			playerMap.MapConfiguration.Doors = append(playerMap.MapConfiguration.Doors, door)
+	worldMap := make(map[int64]*entity.World)
+	for _, v := range worlds {
+		worldMap[v.ID] = v
+	}
+
+	for _, v := range mapConfigurationForPlayers {
+		if world, found := worldMap[v.MapConfiguration.WorldID]; found {
+			world.MapConfigurationForPlayers = append(world.MapConfigurationForPlayers, v)
 		}
 	}
 
-	mapRules, err := s.ruleRepo.ListFromMapConfigurationIDs(ctx, mapConfigIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, rule := range mapRules {
-		if playerMap, found := mapConfigMaps[rule.MapConfigID]; found {
-			playerMap.MapConfiguration.Rules = append(playerMap.MapConfiguration.Rules, rule)
-		}
-	}
-
-	return mapConfigs, nil
+	return worlds, nil
 }

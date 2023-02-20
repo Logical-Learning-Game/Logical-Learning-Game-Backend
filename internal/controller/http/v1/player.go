@@ -1,31 +1,32 @@
 package v1
 
 import (
-	"llg_backend/internal/entity"
+	"fmt"
+	"llg_backend/internal/dto"
+	"llg_backend/internal/entity/nullable"
 	"llg_backend/internal/pkg/httputil"
+	"llg_backend/internal/service"
+	"llg_backend/pkg/utility"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type PlayerController struct {
-	playerService          entity.PlayerService
-	worldService           entity.WorldService
-	playerStatisticService entity.PlayerStatisticService
+	mapConfigService service.MapConfigurationService
+	statisticService service.PlayerStatisticService
 }
 
-func NewPlayerController(playerService entity.PlayerService, worldService entity.WorldService, playerStatisticService entity.PlayerStatisticService) *PlayerController {
+func NewPlayerController(mapConfigService service.MapConfigurationService, statisticService service.PlayerStatisticService) *PlayerController {
 	return &PlayerController{
-		playerService:          playerService,
-		worldService:           worldService,
-		playerStatisticService: playerStatisticService,
+		mapConfigService: mapConfigService,
+		statisticService: statisticService,
 	}
 }
 
-func (c *PlayerController) initRoutes(handler *gin.RouterGroup) {
+func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 	h := handler.Group("/players")
 	{
-		h.POST("/login_log", c.CreateLoginLog)
 		playerGroup := h.Group("/:playerID")
 		{
 			playerGroup.GET("/available_maps", c.ListAvailableMaps)
@@ -34,61 +35,96 @@ func (c *PlayerController) initRoutes(handler *gin.RouterGroup) {
 	}
 }
 
-type createLoginLogRequest struct {
-	PlayerID string `json:"player_id"`
-	Email    string `json:"email"`
-	Name     string `json:"name"`
+func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	playerWorlds, err := c.mapConfigService.ListFromPlayerID(ctx, playerID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	worldDTOs := make([]*dto.WorldDTO, 0, len(playerWorlds))
+	for _, world := range playerWorlds {
+		mapConfigDTOs := make([]*dto.MapConfigurationDTO, 0, len(world.MapConfigurationForPlayers))
+		for _, mapConfig := range world.MapConfigurationForPlayers {
+			pqInt32Tile := mapConfig.MapConfiguration.Tile
+			intTile := make([]int, 0, len(pqInt32Tile))
+			for _, v := range pqInt32Tile {
+				intTile = append(intTile, int(v))
+			}
+
+			height := int(mapConfig.MapConfiguration.Height)
+			width := int(mapConfig.MapConfiguration.Width)
+			twoDimensionSlice := utility.TwoDimensionSlice[int](intTile, height, width)
+			mapConfiguration := mapConfig.MapConfiguration
+
+			rules := make([]*dto.RuleDTO, 0, len(mapConfiguration.Rules))
+			for _, rule := range mapConfiguration.Rules {
+				pqInt32Parameter := rule.Parameters
+				intParameter := make([]int, 0, len(pqInt32Parameter))
+				for _, v := range pqInt32Parameter {
+					intParameter = append(intParameter, int(v))
+				}
+
+				ruleDTO := &dto.RuleDTO{
+					MapRuleID:  rule.ID,
+					RuleName:   rule.RuleName,
+					Theme:      rule.Theme,
+					Parameters: intParameter,
+				}
+
+				rules = append(rules, ruleDTO)
+			}
+
+			mapConfigDTO := &dto.MapConfigurationDTO{
+				MapID:                      mapConfiguration.ID,
+				MapName:                    mapConfiguration.ConfigName,
+				Tile:                       twoDimensionSlice,
+				MapImagePath:               nullable.NullString{NullString: mapConfiguration.MapImagePath},
+				Difficulty:                 mapConfiguration.Difficulty,
+				StarRequirement:            int(mapConfiguration.StarRequirement),
+				LeastSolvableCommandGold:   int(mapConfiguration.LeastSolvableCommandGold),
+				LeastSolvableCommandSilver: int(mapConfiguration.LeastSolvableCommandSilver),
+				LeastSolvableCommandBronze: int(mapConfiguration.LeastSolvableCommandBronze),
+				LeastSolvableActionGold:    int(mapConfiguration.LeastSolvableActionGold),
+				LeastSolvableActionSilver:  int(mapConfiguration.LeastSolvableActionSilver),
+				LeastSolvableActionBronze:  int(mapConfiguration.LeastSolvableActionBronze),
+				Rules:                      rules,
+				IsPass:                     mapConfig.IsPass,
+				TopHistory:                 nil,
+			}
+
+			mapConfigDTOs = append(mapConfigDTOs, mapConfigDTO)
+		}
+
+		worldDTO := &dto.WorldDTO{
+			WorldID:   world.ID,
+			WorldName: world.Name,
+			Maps:      mapConfigDTOs,
+		}
+
+		worldDTOs = append(worldDTOs, worldDTO)
+	}
+
+	ctx.JSON(http.StatusOK, worldDTOs)
 }
 
-func (c *PlayerController) CreateLoginLog(ctx *gin.Context) {
-	var req createLoginLogRequest
+func (c PlayerController) CreateSessionHistory(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
 
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	var createSessionHistoryRequestDTO dto.CreateGameSessionRequestDTO
+	if err := ctx.ShouldBindJSON(&createSessionHistoryRequestDTO); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
 	}
 
-	if err := c.playerService.CreateOrUpdatePlayerInformation(ctx, req.PlayerID, req.Email, req.Name); err != nil {
+	gameSession, err := c.statisticService.CreateSessionHistory(ctx, playerID, createSessionHistoryRequestDTO)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 
-	if err := c.playerService.CreateLoginLog(ctx, req.PlayerID); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
-		return
-	}
-
+	ctx.Header("Location", fmt.Sprintf("/v1/sessions/%d", gameSession.ID))
 	ctx.Status(http.StatusCreated)
-}
-
-func (c *PlayerController) ListAvailableMaps(ctx *gin.Context) {
-	playerID := ctx.Param("playerID")
-
-	playerWorlds, err := c.worldService.ListFromPlayerID(ctx, playerID)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
-		return
-	}
-
-	ctx.JSON(http.StatusOK, playerWorlds)
-}
-
-func (c *PlayerController) CreateSessionHistory(ctx *gin.Context) {
-	playerID := ctx.Param("playerID")
-
-	var req entity.CreateSessionHistoryRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
-		return
-	}
-
-	req.PlayerID = playerID
-
-	gameSession, err := c.playerStatisticService.CreateSessionHistory(ctx, req)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, gameSession)
 }

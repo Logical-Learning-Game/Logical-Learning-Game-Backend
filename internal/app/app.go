@@ -3,7 +3,7 @@ package app
 import (
 	"llg_backend/config"
 	v1 "llg_backend/internal/controller/http/v1"
-	"llg_backend/internal/entity/sqlc_generated"
+	"llg_backend/internal/entity"
 	"llg_backend/internal/pkg/postgres"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
@@ -32,14 +32,30 @@ func Run(cfg *config.Config) {
 
 	handler := gin.New()
 
-	conn, err := postgres.New(cfg.Postgres.URI)
+	db, err := postgres.New(&cfg.Postgres)
 	if err != nil {
-		zapLogger.Fatalw("cannot connect to postgres, exiting program", "err", err)
+		zapLogger.Fatalw("cannot connect to postgres", "err", err)
 	}
 
-	postgresQuery := sqlc_generated.New(conn)
-	playerController := InitializePlayerController(postgresQuery, conn)
+	db.AutoMigrate(
+		&entity.User{},
+		&entity.SignInHistory{},
+		&entity.Item{}, &entity.Door{},
+		&entity.Rule{}, &entity.World{},
+		&entity.MapConfiguration{},
+		&entity.MapConfigurationItem{},
+		&entity.MapConfigurationRule{},
+		&entity.MapConfigurationDoor{},
+		&entity.MapConfigurationForPlayer{},
+		&entity.GameSession{},
+		&entity.SubmitHistory{},
+		&entity.StateValue{},
+		&entity.SubmitHistoryRule{},
+		&entity.CommandNode{},
+		&entity.CommandEdge{},
+	)
 
+	playerController := InitializePlayerController(db)
 	v1.NewRouter(handler, playerController)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))

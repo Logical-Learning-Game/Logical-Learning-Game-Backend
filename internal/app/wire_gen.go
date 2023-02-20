@@ -7,32 +7,21 @@
 package app
 
 import (
-	"database/sql"
 	"github.com/google/wire"
+	"gorm.io/gorm"
 	"llg_backend/internal/controller/http/v1"
-	"llg_backend/internal/entity/sqlc_generated"
-	"llg_backend/internal/repository"
 	"llg_backend/internal/service"
 )
 
 // Injectors from wire.go:
 
-func InitializePlayerController(querier sqlc_generated.Querier, db *sql.DB) *v1.PlayerController {
-	playerRepository := repository.NewPlayerRepository(querier)
-	playerService := service.NewPlayerService(playerRepository)
-	mapConfigurationRepository := repository.NewMapConfigurationRepository(querier)
-	itemRepository := repository.NewItemRepository(querier)
-	doorRepository := repository.NewDoorRepository(querier)
-	ruleRepository := repository.NewRuleRepository(querier)
-	mapConfigurationService := service.NewMapConfigurationService(mapConfigurationRepository, itemRepository, doorRepository, ruleRepository)
-	worldRepository := repository.NewWorldRepository(querier)
-	worldService := service.NewWorldService(mapConfigurationService, worldRepository)
-	unitOfWork := repository.NewUnitOfWork(db)
-	playerStatisticService := service.NewPlayerStatisticService(unitOfWork)
-	playerController := v1.NewPlayerController(playerService, worldService, playerStatisticService)
+func InitializePlayerController(db *gorm.DB) *v1.PlayerController {
+	mapConfigurationService := service.NewMapConfigurationService(db)
+	playerStatisticService := service.NewPlayerStatisticService(db)
+	playerController := v1.NewPlayerController(mapConfigurationService, playerStatisticService)
 	return playerController
 }
 
 // wire.go:
 
-var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewWorldService, service.NewPlayerService, repository.NewPlayerRepository, service.NewMapConfigurationService, repository.NewItemRepository, repository.NewDoorRepository, repository.NewRuleRepository, repository.NewMapConfigurationRepository, repository.NewWorldRepository, repository.NewPlayHistoryRepository, repository.NewGameSessionRepository, repository.NewUnitOfWork)
+var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService)

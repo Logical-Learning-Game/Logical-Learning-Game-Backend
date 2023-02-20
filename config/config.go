@@ -3,21 +3,19 @@ package config
 import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
+	"llg_backend/internal/pkg/postgres"
 )
 
 type Config struct {
-	HTTP      `mapstructure:",squash"`
-	Postgres  `mapstructure:",squash"`
+	HTTP      HTTP            `mapstructure:",squash"`
+	Postgres  postgres.Config `mapstructure:",squash"`
 }
 
 type HTTP struct {
 	Port string `mapstructure:"SERVER_PORT"`
 }
 
-type Postgres struct {
-	URI string `mapstructure:"POSTGRES_URI"`
 }
-
 
 func LoadConfigEnv() error {
 	var config Config

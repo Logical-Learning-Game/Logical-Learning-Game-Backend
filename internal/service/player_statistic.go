@@ -2,119 +2,128 @@ package service
 
 import (
 	"context"
+	"gorm.io/gorm"
+	"llg_backend/internal/dto"
 	"llg_backend/internal/entity"
 )
 
 type playerStatisticService struct {
-	unitOfWork entity.UnitOfWork
+	db *gorm.DB
 }
 
-func NewPlayerStatisticService(unitOfWork entity.UnitOfWork) entity.PlayerStatisticService {
-	return &playerStatisticService{
-		unitOfWork: unitOfWork,
+func NewPlayerStatisticService(db *gorm.DB) PlayerStatisticService {
+	return &playerStatisticService{db: db}
+}
+
+func (s playerStatisticService) CreateSessionHistory(ctx context.Context, playerID string, arg dto.CreateGameSessionRequestDTO) (*entity.GameSession, error) {
+	gameSession := &entity.GameSession{
+		PlayerID:           playerID,
+		MapConfigurationID: arg.MapConfigurationID,
+		StartDatetime:      arg.StartDatetime,
+		EndDatetime:        arg.EndDatetime,
 	}
-}
 
-func (s playerStatisticService) CreateSessionHistory(ctx context.Context, arg entity.CreateSessionHistoryRequest) (*entity.GameSession, error) {
-	var resultGameSession *entity.GameSession
-
-	err := s.unitOfWork.Do(ctx, func(store *entity.UnitOfWorkStore) error {
-		gameSession, txErr := store.GameSessionRepo.CreateGameSession(ctx, entity.CreateGameSessionParams{
-			PlayerID:           arg.PlayerID,
-			MapConfigurationID: arg.MapConfigurationID,
-			StartDatetime:      arg.StartDatetime,
-			EndDatetime:        arg.EndDatetime,
-		})
-		if txErr != nil {
-			return txErr
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(gameSession)
+		if err := result.Error; err != nil {
+			return err
 		}
 
-		for _, history := range arg.GameHistories {
-			playHistory, txErr := store.PlayHistoryRepo.CreatePlayHistory(ctx, entity.CreatePlayHistoryParams{
+		for _, submitHistoryDTO := range arg.SubmitHistories {
+			submitHistory := &entity.SubmitHistory{
 				GameSessionID:   gameSession.ID,
-				ActionStep:      history.ActionStep,
-				NumberOfCommand: history.NumberOfCommand,
-				IsFinited:       history.IsFinited,
-				IsCompleted:     history.IsCompleted,
-				CommandMedal:    history.CommandMedal,
-				ActionMedal:     history.ActionMedal,
-				SubmitDatetime:  history.SubmitDatetime,
-			})
-			if txErr != nil {
-				return txErr
+				ActionStep:      int32(submitHistoryDTO.ActionStep),
+				NumberOfCommand: int32(submitHistoryDTO.NumberOfCommand),
+				IsFinited:       submitHistoryDTO.IsFinited,
+				IsCompleted:     submitHistoryDTO.IsCompleted,
+				CommandMedal:    submitHistoryDTO.CommandMedal,
+				ActionMedal:     submitHistoryDTO.ActionMedal,
+				SubmitDatetime:  submitHistoryDTO.SubmitDatetime,
 			}
 
-			stateValue, txErr := store.PlayHistoryRepo.CreateStateValue(ctx, entity.CreateStateValueParams{
-				PlayHistoryID:         playHistory.ID,
-				CommandCount:          history.StateValue.CommandCount,
-				ForwardCommandCount:   history.StateValue.ForwardCommandCount,
-				RightCommandCount:     history.StateValue.RightCommandCount,
-				BackCommandCount:      history.StateValue.BackCommandCount,
-				LeftCommandCount:      history.StateValue.LeftCommandCount,
-				ConditionCommandCount: history.StateValue.ConditionCommandCount,
-				ActionCount:           history.StateValue.ActionCount,
-				ForwardActionCount:    history.StateValue.ForwardActionCount,
-				RightActionCount:      history.StateValue.RightActionCount,
-				BackActionCount:       history.StateValue.BackActionCount,
-				LeftActionCount:       history.StateValue.LeftActionCount,
-				ConditionActionCount:  history.StateValue.ConditionActionCount,
-			})
-			if txErr != nil {
-				return txErr
+			result = tx.Create(submitHistory)
+			if err := result.Error; err != nil {
+				return err
 			}
 
-			playHistory.StateValue = stateValue
+			stateValue := &entity.StateValue{
+				SubmitHistoryID:       submitHistory.ID,
+				CommandCount:          int32(submitHistoryDTO.StateValue.CommandCount),
+				ForwardCommandCount:   int32(submitHistoryDTO.StateValue.ForwardCommandCount),
+				RightCommandCount:     int32(submitHistoryDTO.StateValue.RightCommandCount),
+				BackCommandCount:      int32(submitHistoryDTO.StateValue.BackCommandCount),
+				LeftCommandCount:      int32(submitHistoryDTO.StateValue.LeftCommandCount),
+				ConditionCommandCount: int32(submitHistoryDTO.StateValue.ConditionCommandCount),
+				ActionCount:           int32(submitHistoryDTO.StateValue.ActionCount),
+				ForwardActionCount:    int32(submitHistoryDTO.StateValue.ForwardActionCount),
+				RightActionCount:      int32(submitHistoryDTO.StateValue.RightActionCount),
+				BackActionCount:       int32(submitHistoryDTO.StateValue.BackActionCount),
+				LeftActionCount:       int32(submitHistoryDTO.StateValue.LeftActionCount),
+				ConditionActionCount:  int32(submitHistoryDTO.StateValue.ConditionActionCount),
+			}
 
-			for _, rule := range history.Rules {
-				ruleHistory, txErr := store.PlayHistoryRepo.CreateRuleHistory(ctx, entity.CreateRuleHistoryParams{
-					PlayHistoryID:   playHistory.ID,
-					MapConfigRuleID: rule.MapConfigRuleID,
-					IsPass:          rule.IsPass,
-				})
-				if txErr != nil {
-					return txErr
+			result = tx.Create(stateValue)
+			if err := result.Error; err != nil {
+				return err
+			}
+
+			submitHistory.StateValue = stateValue
+
+			for _, ruleDTO := range submitHistoryDTO.SubmitHistoryRules {
+				rule := &entity.SubmitHistoryRule{
+					SubmitHistoryID:        submitHistory.ID,
+					MapConfigurationRuleID: ruleDTO.MapRuleID,
+					IsPass:                 ruleDTO.IsPass,
 				}
 
-				playHistory.Rules = append(playHistory.Rules, ruleHistory)
+				result = tx.Create(rule)
+				if err := result.Error; err != nil {
+					return err
+				}
+
+				submitHistory.SubmitHistoryRules = append(submitHistory.SubmitHistoryRules, rule)
 			}
 
-			nodeIndexMap := make(map[int]int64)
-			for _, node := range history.CommandNodes {
-				commandNode, txErr := store.PlayHistoryRepo.CreateCommandNode(ctx, entity.CreateCommandNodeParams{
-					PlayHistoryID: playHistory.ID,
-					Type:          node.Type,
-					InGamePosition: entity.Vector2Float{
-						X: node.InGamePosition.X,
-						Y: node.InGamePosition.Y,
+			for _, commandNodeDTO := range submitHistoryDTO.CommandNodes {
+				commandNode := &entity.CommandNode{
+					SubmitHistoryID: submitHistory.ID,
+					Index:           int32(commandNodeDTO.NodeIndex),
+					Type:            commandNodeDTO.Type,
+					InGamePosition: entity.Vector2Float32{
+						X: commandNodeDTO.InGamePosition.X,
+						Y: commandNodeDTO.InGamePosition.Y,
 					},
-				})
-				if txErr != nil {
-					return txErr
 				}
 
-				nodeIndexMap[node.NodeIndex] = commandNode.ID
-				playHistory.CommandNodes = append(playHistory.CommandNodes, commandNode)
-			}
-
-			for _, edge := range history.CommandEdges {
-				commandEdge, txErr := store.PlayHistoryRepo.CreateCommandEdge(ctx, entity.CreateCommandEdgeParams{
-					SourceNodeID:      nodeIndexMap[edge.SourceNodeIndex],
-					DestinationNodeID: nodeIndexMap[edge.DestinationIndex],
-					Type:              edge.Type,
-				})
-				if txErr != nil {
-					return txErr
+				result = tx.Create(commandNode)
+				if err := result.Error; err != nil {
+					return err
 				}
 
-				playHistory.CommandEdges = append(playHistory.CommandEdges, commandEdge)
+				submitHistory.CommandNodes = append(submitHistory.CommandNodes, commandNode)
 			}
 
-			gameSession.GameHistory = append(gameSession.GameHistory, playHistory)
+			for _, commandEdgeDTO := range submitHistoryDTO.CommandEdges {
+				commandEdge := &entity.CommandEdge{
+					SubmitHistoryID:      submitHistory.ID,
+					SourceNodeIndex:      int32(commandEdgeDTO.SourceNodeIndex),
+					DestinationNodeIndex: int32(commandEdgeDTO.DestinationNodeIndex),
+					Type:                 commandEdgeDTO.Type,
+				}
+
+				result = tx.Create(commandEdge)
+				if err := result.Error; err != nil {
+					return err
+				}
+
+				submitHistory.CommandEdges = append(submitHistory.CommandEdges, commandEdge)
+			}
+
+			gameSession.SubmitHistories = append(gameSession.SubmitHistories, submitHistory)
 		}
 
-		resultGameSession = gameSession
 		return nil
 	})
 
-	return resultGameSession, err
+	return gameSession, txErr
 }

@@ -1,24 +1,25 @@
 package postgres
 
 import (
-	"database/sql"
 	"llg_backend/pkg/logger"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func New(uri string) (*sql.DB, error) {
-	logger.GlobalLog.Infof("connecting to postgres at %s", uri)
+type Config struct {
+	URI string `mapstructure:"POSTGRES_URI"`
+}
 
-	conn, err := sql.Open("postgres", uri)
+func New(config *Config) (*gorm.DB, error) {
+	logger.GlobalLog.Infof("connecting to postgres at %s", config.URI)
+
+	db, err := gorm.Open(postgres.Open(config.URI), &gorm.Config{})
 	if err != nil {
 		logger.GlobalLog.Errorw("connect to postgres failed", "err", err)
 		return nil, err
 	}
 
-	if err = conn.Ping(); err != nil {
-		logger.GlobalLog.Errorw("verify postgres connection failed", "err", err)
-		return nil, err
-	}
-
 	logger.GlobalLog.Infof("connecting to postgres successful")
-	return conn, nil
+	return db, nil
 }
