@@ -1,9 +1,8 @@
 //go:build wireinject
 
-package app
+package v1
 
 import (
-	v1 "llg_backend/internal/controller/http/v1"
 	"llg_backend/internal/service"
 
 	"github.com/google/wire"
@@ -15,10 +14,10 @@ var providerSet = wire.NewSet(
 	service.NewMapConfigurationService,
 )
 
-func InitializePlayerController(db *gorm.DB) *v1.PlayerController {
+func InitializePlayerController(db *gorm.DB) *PlayerController {
 	wire.Build(
-		v1.NewPlayerController,
+		NewPlayerController,
 		providerSet,
 	)
-	return &v1.PlayerController{}
+	return &PlayerController{}
 }

@@ -2,7 +2,7 @@ package app
 
 import (
 	"llg_backend/config"
-	v1 "llg_backend/internal/controller/http/v1"
+	"llg_backend/internal/controller/http"
 	"llg_backend/internal/entity"
 	"llg_backend/internal/pkg/postgres"
 	"llg_backend/pkg/httpserver"
@@ -55,8 +55,7 @@ func Run(cfg *config.Config) {
 		&entity.CommandEdge{},
 	)
 
-	playerController := InitializePlayerController(db)
-	v1.NewRouter(handler, playerController)
+	http.NewRouter(handler, db)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 	httpServer.Start()

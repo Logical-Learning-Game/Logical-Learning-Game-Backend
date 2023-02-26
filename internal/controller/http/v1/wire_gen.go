@@ -4,21 +4,20 @@
 //go:build !wireinject
 // +build !wireinject
 
-package app
+package v1
 
 import (
 	"github.com/google/wire"
 	"gorm.io/gorm"
-	"llg_backend/internal/controller/http/v1"
 	"llg_backend/internal/service"
 )
 
 // Injectors from wire.go:
 
-func InitializePlayerController(db *gorm.DB) *v1.PlayerController {
+func InitializePlayerController(db *gorm.DB) *PlayerController {
 	mapConfigurationService := service.NewMapConfigurationService(db)
 	playerStatisticService := service.NewPlayerStatisticService(db)
-	playerController := v1.NewPlayerController(mapConfigurationService, playerStatisticService)
+	playerController := NewPlayerController(mapConfigurationService, playerStatisticService)
 	return playerController
 }
 
