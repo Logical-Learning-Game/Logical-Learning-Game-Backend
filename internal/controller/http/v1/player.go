@@ -6,7 +6,6 @@ import (
 	"llg_backend/internal/entity/nullable"
 	"llg_backend/internal/pkg/httputil"
 	"llg_backend/internal/service"
-	"llg_backend/pkg/utility"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,22 +48,20 @@ func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
 		mapConfigDTOs := make([]*dto.MapConfigurationDTO, 0, len(world.MapConfigurationForPlayers))
 		for _, mapConfig := range world.MapConfigurationForPlayers {
 			pqInt32Tile := mapConfig.MapConfiguration.Tile
-			intTile := make([]int, 0, len(pqInt32Tile))
-			for _, v := range pqInt32Tile {
-				intTile = append(intTile, int(v))
+
+			intTile := make([]int, len(pqInt32Tile))
+			for i := range pqInt32Tile {
+				intTile[i] = int(pqInt32Tile[i])
 			}
 
-			height := int(mapConfig.MapConfiguration.Height)
-			width := int(mapConfig.MapConfiguration.Width)
-			twoDimensionSlice := utility.TwoDimensionSlice[int](intTile, height, width)
 			mapConfiguration := mapConfig.MapConfiguration
 
 			rules := make([]*dto.RuleDTO, 0, len(mapConfiguration.Rules))
 			for _, rule := range mapConfiguration.Rules {
 				pqInt32Parameter := rule.Parameters
-				intParameter := make([]int, 0, len(pqInt32Parameter))
-				for _, v := range pqInt32Parameter {
-					intParameter = append(intParameter, int(v))
+				intParameter := make([]int, len(pqInt32Parameter))
+				for i := range pqInt32Parameter {
+					intParameter[i] = int(pqInt32Parameter[i])
 				}
 
 				ruleDTO := &dto.RuleDTO{
@@ -80,7 +77,9 @@ func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
 			mapConfigDTO := &dto.MapConfigurationDTO{
 				MapID:                      mapConfiguration.ID,
 				MapName:                    mapConfiguration.ConfigName,
-				Tile:                       twoDimensionSlice,
+				Tile:                       intTile,
+				Height:                     int(mapConfig.MapConfiguration.Height),
+				Width:                      int(mapConfig.MapConfiguration.Width),
 				MapImagePath:               nullable.NullString{NullString: mapConfiguration.MapImagePath},
 				Difficulty:                 mapConfiguration.Difficulty,
 				StarRequirement:            int(mapConfiguration.StarRequirement),

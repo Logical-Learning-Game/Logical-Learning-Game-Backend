@@ -15,7 +15,9 @@ type WorldDTO struct {
 type MapConfigurationDTO struct {
 	MapID                      int64               `json:"map_id"`
 	MapName                    string              `json:"map_name"`
-	Tile                       [][]int             `json:"tile"`
+	Tile                       []int               `json:"tile"`
+	Height                     int                 `json:"height"`
+	Width                      int                 `json:"width"`
 	MapImagePath               nullable.NullString `json:"map_image_path"`
 	Difficulty                 entity.Difficulty   `json:"difficulty"`
 	StarRequirement            int                 `json:"star_requirement"`
