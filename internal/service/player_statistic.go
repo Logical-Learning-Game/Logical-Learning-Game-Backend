@@ -31,14 +31,12 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, player
 
 		for _, submitHistoryDTO := range arg.SubmitHistories {
 			submitHistory := &entity.SubmitHistory{
-				GameSessionID:   gameSession.ID,
-				ActionStep:      int32(submitHistoryDTO.ActionStep),
-				NumberOfCommand: int32(submitHistoryDTO.NumberOfCommand),
-				IsFinited:       submitHistoryDTO.IsFinited,
-				IsCompleted:     submitHistoryDTO.IsCompleted,
-				CommandMedal:    submitHistoryDTO.CommandMedal,
-				ActionMedal:     submitHistoryDTO.ActionMedal,
-				SubmitDatetime:  submitHistoryDTO.SubmitDatetime,
+				GameSessionID:  gameSession.ID,
+				IsFinited:      submitHistoryDTO.IsFinited,
+				IsCompleted:    submitHistoryDTO.IsCompleted,
+				CommandMedal:   submitHistoryDTO.CommandMedal,
+				ActionMedal:    submitHistoryDTO.ActionMedal,
+				SubmitDatetime: submitHistoryDTO.SubmitDatetime,
 			}
 
 			result = tx.Create(submitHistory)

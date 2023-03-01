@@ -28,8 +28,6 @@ type MapConfigurationDTO struct {
 	LeastSolvableActionSilver  int                 `json:"least_solvable_action_silver"`
 	LeastSolvableActionBronze  int                 `json:"least_solvable_action_bronze"`
 	Rules                      []*RuleDTO          `json:"rules"`
-	IsPass                     bool                `json:"is_pass"`
-	TopHistory                 *SubmitHistoryDTO   `json:"top_history"`
 }
 
 type RuleDTO struct {
@@ -40,8 +38,6 @@ type RuleDTO struct {
 }
 
 type SubmitHistoryDTO struct {
-	ActionStep         int                     `json:"action_step"`
-	NumberOfCommand    int                     `json:"number_of_command"`
 	IsFinited          bool                    `json:"is_finited"`
 	IsCompleted        bool                    `json:"is_completed"`
 	CommandMedal       entity.MedalType        `json:"command_medal"`

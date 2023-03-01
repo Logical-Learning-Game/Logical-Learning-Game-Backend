@@ -127,8 +127,6 @@ type GameSession struct {
 type SubmitHistory struct {
 	ID                 int64                `gorm:"primaryKey"`
 	GameSessionID      int64                `gorm:"not null"`
-	ActionStep         int32                `gorm:"not null"`
-	NumberOfCommand    int32                `gorm:"not null"`
 	IsFinited          bool                 `gorm:"not null"`
 	IsCompleted        bool                 `gorm:"not null"`
 	CommandMedal       MedalType            `gorm:"type:medal_type;not null"`
