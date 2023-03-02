@@ -92,3 +92,8 @@ type CreateGameSessionRequestDTO struct {
 	EndDatetime        nullable.NullTime   `json:"end_datetime"`
 	SubmitHistories    []*SubmitHistoryDTO `json:"submit_histories"`
 }
+
+type TopSubmitHistoryDTO struct {
+	MapConfigurationID int64             `json:"map_id"`
+	SubmitHistory      *SubmitHistoryDTO `json:"top_submit_history"`
+}

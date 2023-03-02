@@ -108,10 +108,12 @@ type MapConfigurationDoor struct {
 }
 
 type MapConfigurationForPlayer struct {
+	ID                 int64             `gorm:"primaryKey"`
 	PlayerID           string            `gorm:"not null"`
 	MapConfigurationID int64             `gorm:"not null"`
 	MapConfiguration   *MapConfiguration `gorm:"foreignKey:MapConfigurationID"`
 	IsPass             bool              `gorm:"not null;default:false"`
+	TopSubmitHistory   *SubmitHistory    `gorm:"foreignKey:MapConfigurationForPlayerID"`
 }
 
 type GameSession struct {
@@ -125,17 +127,18 @@ type GameSession struct {
 }
 
 type SubmitHistory struct {
-	ID                 int64                `gorm:"primaryKey"`
-	GameSessionID      int64                `gorm:"not null"`
-	IsFinited          bool                 `gorm:"not null"`
-	IsCompleted        bool                 `gorm:"not null"`
-	CommandMedal       MedalType            `gorm:"type:medal_type;not null"`
-	ActionMedal        MedalType            `gorm:"type:medal_type;not null"`
-	SubmitDatetime     time.Time            `gorm:"not null"`
-	StateValue         *StateValue          `gorm:"foreignKey:SubmitHistoryID"`
-	SubmitHistoryRules []*SubmitHistoryRule `gorm:"foreignKey:SubmitHistoryID"`
-	CommandNodes       []*CommandNode       `gorm:"foreignKey:SubmitHistoryID"`
-	CommandEdges       []*CommandEdge       `gorm:"foreignKey:SubmitHistoryID"`
+	ID                          int64 `gorm:"primaryKey"`
+	GameSessionID               int64
+	MapConfigurationForPlayerID int64
+	IsFinited                   bool                 `gorm:"not null"`
+	IsCompleted                 bool                 `gorm:"not null"`
+	CommandMedal                MedalType            `gorm:"type:medal_type;not null"`
+	ActionMedal                 MedalType            `gorm:"type:medal_type;not null"`
+	SubmitDatetime              time.Time            `gorm:"not null"`
+	StateValue                  *StateValue          `gorm:"foreignKey:SubmitHistoryID;constraint:OnDelete:CASCADE"`
+	SubmitHistoryRules          []*SubmitHistoryRule `gorm:"foreignKey:SubmitHistoryID;constraint:OnDelete:CASCADE"`
+	CommandNodes                []*CommandNode       `gorm:"foreignKey:SubmitHistoryID;constraint:OnDelete:CASCADE"`
+	CommandEdges                []*CommandEdge       `gorm:"foreignKey:SubmitHistoryID;constraint:OnDelete:CASCADE"`
 }
 
 type StateValue struct {

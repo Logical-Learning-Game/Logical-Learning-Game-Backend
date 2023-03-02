@@ -28,8 +28,9 @@ func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 	{
 		playerGroup := h.Group("/:playerID")
 		{
-			playerGroup.GET("/available_maps", c.ListAvailableMaps)
 			playerGroup.POST("/statistics", c.CreateSessionHistory)
+			playerGroup.POST("/top_submit_history", c.UpdateTopSubmitHistory)
+			playerGroup.GET("/maps", c.ListAvailableMaps)
 		}
 	}
 }
@@ -69,5 +70,23 @@ func (c PlayerController) CreateSessionHistory(ctx *gin.Context) {
 	}
 
 	ctx.Header("Location", fmt.Sprintf("/v1/sessions/%d", gameSession.ID))
+	ctx.Status(http.StatusCreated)
+}
+
+func (c PlayerController) UpdateTopSubmitHistory(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	var topSubmitHistoryDTO []*dto.TopSubmitHistoryDTO
+	if err := ctx.ShouldBindJSON(&topSubmitHistoryDTO); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	_, err := c.statisticService.UpdateTopSubmitHistory(ctx, playerID, topSubmitHistoryDTO)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
 	ctx.Status(http.StatusCreated)
 }

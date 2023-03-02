@@ -8,6 +8,7 @@ import (
 
 type PlayerStatisticService interface {
 	CreateSessionHistory(ctx context.Context, playerID string, arg dto.CreateGameSessionRequestDTO) (*entity.GameSession, error)
+	UpdateTopSubmitHistory(ctx context.Context, playerID string, args []*dto.TopSubmitHistoryDTO) ([]*entity.SubmitHistory, error)
 }
 
 type MapConfigurationService interface {
