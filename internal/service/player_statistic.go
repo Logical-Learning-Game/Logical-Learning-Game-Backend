@@ -4,6 +4,7 @@ import (
 	"context"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/entity"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -139,6 +140,10 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				MapConfigurationID: entry.MapConfigurationID,
 			}).Find(&mapConfigurationForPlayer)
 
+			// set is pass status to pass
+			mapConfigurationForPlayer.IsPass = true
+			tx.Save(&mapConfigurationForPlayer)
+
 			// remove old top submit history
 			tx.Where(&entity.SubmitHistory{
 				MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
@@ -245,4 +250,20 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 	})
 
 	return insertedTopSubmitHistories, txErr
+}
+
+func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playerID string) ([]*entity.GameSession, error) {
+	gameSessions := make([]*entity.GameSession, 0)
+
+	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+	result := s.db.WithContext(ctx).
+		Preload("SubmitHistories").
+		Preload("SubmitHistories.StateValue").
+		Preload("SubmitHistories.SubmitHistoryRules").
+		Preload("SubmitHistories.CommandNodes").
+		Preload("SubmitHistories.CommandEdges").
+		Where("player_id = ? AND start_datetime >= ?", playerID, sixMonthsAgo).
+		Find(&gameSessions)
+
+	return gameSessions, result.Error
 }

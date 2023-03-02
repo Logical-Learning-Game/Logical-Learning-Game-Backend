@@ -28,7 +28,8 @@ func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 	{
 		playerGroup := h.Group("/:playerID")
 		{
-			playerGroup.POST("/statistics", c.CreateSessionHistory)
+			playerGroup.GET("/session_history", c.ListSessionHistory)
+			playerGroup.POST("/session_history", c.CreateSessionHistory)
 			playerGroup.POST("/top_submit_history", c.UpdateTopSubmitHistory)
 			playerGroup.GET("/maps", c.ListAvailableMaps)
 		}
@@ -38,7 +39,7 @@ func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	playerWorlds, err := c.mapConfigService.ListFromPlayerID(ctx, playerID)
+	playerWorlds, err := c.mapConfigService.ListPlayerAvailableMaps(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
@@ -71,6 +72,18 @@ func (c PlayerController) CreateSessionHistory(ctx *gin.Context) {
 
 	ctx.Header("Location", fmt.Sprintf("/v1/sessions/%d", gameSession.ID))
 	ctx.Status(http.StatusCreated)
+}
+
+func (c PlayerController) ListSessionHistory(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	gameSessions, err := c.statisticService.ListPlayerSessionData(ctx, playerID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gameSessions)
 }
 
 func (c PlayerController) UpdateTopSubmitHistory(ctx *gin.Context) {

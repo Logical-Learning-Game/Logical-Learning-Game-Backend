@@ -17,7 +17,7 @@ func NewMapConfigurationService(db *gorm.DB) MapConfigurationService {
 	}
 }
 
-func (s *mapConfigurationService) ListFromPlayerID(ctx context.Context, playerID string) ([]*entity.World, error) {
+func (s *mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*entity.World, error) {
 	var mapConfigurationForPlayers []*entity.MapConfigurationForPlayer
 	result := s.db.WithContext(ctx).
 		Where(&entity.MapConfigurationForPlayer{PlayerID: playerID}).
