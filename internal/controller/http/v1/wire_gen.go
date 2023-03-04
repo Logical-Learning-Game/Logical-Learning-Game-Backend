@@ -17,10 +17,11 @@ import (
 func InitializePlayerController(db *gorm.DB) *PlayerController {
 	mapConfigurationService := service.NewMapConfigurationService(db)
 	playerStatisticService := service.NewPlayerStatisticService(db)
-	playerController := NewPlayerController(mapConfigurationService, playerStatisticService)
+	playerService := service.NewPlayerService(db)
+	playerController := NewPlayerController(mapConfigurationService, playerStatisticService, playerService)
 	return playerController
 }
 
 // wire.go:
 
-var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService)
+var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService, service.NewPlayerService)

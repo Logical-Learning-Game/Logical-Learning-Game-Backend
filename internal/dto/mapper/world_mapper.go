@@ -8,8 +8,8 @@ import (
 
 type WorldMapper struct{}
 
-func NewWorldMapper() *WorldMapper {
-	return &WorldMapper{}
+func NewWorldMapper() WorldMapper {
+	return WorldMapper{}
 }
 
 func (m WorldMapper) ToDTO(world *entity.World) *dto.WorldDTO {

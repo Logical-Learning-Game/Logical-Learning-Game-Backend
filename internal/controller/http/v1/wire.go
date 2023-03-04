@@ -12,6 +12,7 @@ import (
 var providerSet = wire.NewSet(
 	service.NewPlayerStatisticService,
 	service.NewMapConfigurationService,
+	service.NewPlayerService,
 )
 
 func InitializePlayerController(db *gorm.DB) *PlayerController {

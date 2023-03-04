@@ -86,7 +86,7 @@ type Vector2FloatDTO struct {
 	Y float32 `json:"y"`
 }
 
-type CreateGameSessionRequestDTO struct {
+type SessionHistoryDTO struct {
 	MapConfigurationID int64               `json:"map_id"`
 	StartDatetime      time.Time           `json:"start_datetime"`
 	EndDatetime        nullable.NullTime   `json:"end_datetime"`
@@ -96,4 +96,18 @@ type CreateGameSessionRequestDTO struct {
 type TopSubmitHistoryDTO struct {
 	MapConfigurationID int64             `json:"map_id"`
 	SubmitHistory      *SubmitHistoryDTO `json:"top_submit_history"`
+}
+
+type SyncPlayerDataResponseDTO struct {
+	SessionHistories   []*SessionHistoryDTO        `json:"session_histories"`
+	TopSubmitHistories map[int64]*SubmitHistoryDTO `json:"top_submits"`
+}
+
+type LinkAccountRequestDTO struct {
+	PlayerID string `json:"player_id"`
+	Email    string `json:"email"`
+}
+
+type PlayerInfoResponseDTO struct {
+	Found bool `json:"found"`
 }

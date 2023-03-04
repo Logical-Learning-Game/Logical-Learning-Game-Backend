@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"llg_backend/internal/dto"
+	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
 	"time"
 
@@ -17,7 +18,7 @@ func NewPlayerStatisticService(db *gorm.DB) PlayerStatisticService {
 	return &playerStatisticService{db: db}
 }
 
-func (s playerStatisticService) CreateSessionHistory(ctx context.Context, playerID string, arg dto.CreateGameSessionRequestDTO) (*entity.GameSession, error) {
+func (s playerStatisticService) CreateSessionHistory(ctx context.Context, playerID string, arg dto.SessionHistoryDTO) (*entity.GameSession, error) {
 	gameSession := &entity.GameSession{
 		PlayerID:           playerID,
 		MapConfigurationID: arg.MapConfigurationID,
@@ -135,19 +136,28 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 		for _, entry := range args {
 			// find map for player that need to update top submit history
 			var mapConfigurationForPlayer entity.MapConfigurationForPlayer
-			tx.Where(&entity.MapConfigurationForPlayer{
+			result := tx.Where(&entity.MapConfigurationForPlayer{
 				PlayerID:           playerID,
 				MapConfigurationID: entry.MapConfigurationID,
 			}).Find(&mapConfigurationForPlayer)
+			if err := result.Error; err != nil {
+				return err
+			}
 
 			// set is pass status to pass
 			mapConfigurationForPlayer.IsPass = true
-			tx.Save(&mapConfigurationForPlayer)
+			result = tx.Save(&mapConfigurationForPlayer)
+			if err := result.Error; err != nil {
+				return err
+			}
 
 			// remove old top submit history
-			tx.Where(&entity.SubmitHistory{
+			result = tx.Where(&entity.SubmitHistory{
 				MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
 			}).Delete(&entity.SubmitHistory{})
+			if err := result.Error; err != nil {
+				return err
+			}
 
 			// insert new top submit history
 			topSubmit := entry.SubmitHistory
@@ -160,7 +170,7 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				SubmitDatetime:              topSubmit.SubmitDatetime,
 			}
 
-			result := tx.Omit("GameSessionID").Create(submitHistory)
+			result = tx.Omit("GameSessionID").Create(submitHistory)
 			if err := result.Error; err != nil {
 				return err
 			}
@@ -252,7 +262,38 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 	return insertedTopSubmitHistories, txErr
 }
 
-func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playerID string) ([]*entity.GameSession, error) {
+func (s playerStatisticService) ListTopSubmitHistory(ctx context.Context, playerID string) ([]*dto.TopSubmitHistoryDTO, error) {
+	mapConfigurationForPlayers := make([]*entity.MapConfigurationForPlayer, 0)
+
+	result := s.db.WithContext(ctx).
+		Model(&entity.MapConfigurationForPlayer{}).
+		InnerJoins("TopSubmitHistory").
+		Where(&entity.MapConfigurationForPlayer{
+			PlayerID: playerID,
+		}).
+		Preload("TopSubmitHistory.StateValue").
+		Preload("TopSubmitHistory.SubmitHistoryRules").
+		Preload("TopSubmitHistory.CommandNodes").
+		Preload("TopSubmitHistory.CommandEdges").
+		Find(&mapConfigurationForPlayers)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	submitHistoryMapper := mapper.NewSubmitHistoryMapper()
+
+	topSubmitHistoryDTOs := make([]*dto.TopSubmitHistoryDTO, 0, len(mapConfigurationForPlayers))
+	for _, v := range mapConfigurationForPlayers {
+		topSubmitHistoryDTOs = append(topSubmitHistoryDTOs, &dto.TopSubmitHistoryDTO{
+			MapConfigurationID: v.MapConfigurationID,
+			SubmitHistory:      submitHistoryMapper.ToDTO(v.TopSubmitHistory),
+		})
+	}
+
+	return topSubmitHistoryDTOs, nil
+}
+
+func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playerID string) ([]*dto.SessionHistoryDTO, error) {
 	gameSessions := make([]*entity.GameSession, 0)
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
@@ -264,6 +305,40 @@ func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playe
 		Preload("SubmitHistories.CommandEdges").
 		Where("player_id = ? AND start_datetime >= ?", playerID, sixMonthsAgo).
 		Find(&gameSessions)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
 
-	return gameSessions, result.Error
+	sessionHistoryMapper := mapper.NewSessionHistoryMapper()
+
+	sessionHistoryDTOs := make([]*dto.SessionHistoryDTO, 0, len(gameSessions))
+	for _, v := range gameSessions {
+		sessionHistoryDTO := sessionHistoryMapper.ToDTO(v)
+		sessionHistoryDTOs = append(sessionHistoryDTOs, sessionHistoryDTO)
+	}
+
+	return sessionHistoryDTOs, nil
+}
+
+func (s playerStatisticService) GetPlayerData(ctx context.Context, playerID string) (*dto.SyncPlayerDataResponseDTO, error) {
+	sessionHistoryDTOs, err := s.ListPlayerSessionData(ctx, playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	topSubmitHistoryDTOs, err := s.ListTopSubmitHistory(ctx, playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	syncPlayerDataDTO := &dto.SyncPlayerDataResponseDTO{
+		SessionHistories:   sessionHistoryDTOs,
+		TopSubmitHistories: make(map[int64]*dto.SubmitHistoryDTO),
+	}
+
+	for _, v := range topSubmitHistoryDTOs {
+		syncPlayerDataDTO.TopSubmitHistories[v.MapConfigurationID] = v.SubmitHistory
+	}
+
+	return syncPlayerDataDTO, nil
 }

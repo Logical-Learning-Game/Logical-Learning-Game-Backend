@@ -113,7 +113,7 @@ type MapConfigurationForPlayer struct {
 	MapConfigurationID int64             `gorm:"not null"`
 	MapConfiguration   *MapConfiguration `gorm:"foreignKey:MapConfigurationID"`
 	IsPass             bool              `gorm:"not null;default:false"`
-	TopSubmitHistory   *SubmitHistory    `gorm:"foreignKey:MapConfigurationForPlayerID"`
+	TopSubmitHistory   *SubmitHistory    `gorm:"foreignKey:MapConfigurationForPlayerID;constraint:OnDelete:CASCADE"`
 }
 
 type GameSession struct {
@@ -123,7 +123,7 @@ type GameSession struct {
 	MapConfiguration   *MapConfiguration `gorm:"foreignKey:MapConfigurationID"`
 	StartDatetime      time.Time         `gorm:"not null"`
 	EndDatetime        nullable.NullTime
-	SubmitHistories    []*SubmitHistory `gorm:"foreignKey:GameSessionID"`
+	SubmitHistories    []*SubmitHistory `gorm:"foreignKey:GameSessionID;constraint:OnDelete:CASCADE"`
 }
 
 type SubmitHistory struct {

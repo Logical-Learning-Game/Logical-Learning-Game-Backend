@@ -7,11 +7,19 @@ import (
 )
 
 type PlayerStatisticService interface {
-	CreateSessionHistory(ctx context.Context, playerID string, arg dto.CreateGameSessionRequestDTO) (*entity.GameSession, error)
+	CreateSessionHistory(ctx context.Context, playerID string, arg dto.SessionHistoryDTO) (*entity.GameSession, error)
 	UpdateTopSubmitHistory(ctx context.Context, playerID string, args []*dto.TopSubmitHistoryDTO) ([]*entity.SubmitHistory, error)
-	ListPlayerSessionData(ctx context.Context, playerID string) ([]*entity.GameSession, error)
+	ListPlayerSessionData(ctx context.Context, playerID string) ([]*dto.SessionHistoryDTO, error)
+	ListTopSubmitHistory(ctx context.Context, playerID string) ([]*dto.TopSubmitHistoryDTO, error)
+	GetPlayerData(ctx context.Context, playerID string) (*dto.SyncPlayerDataResponseDTO, error)
 }
 
 type MapConfigurationService interface {
 	ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*entity.World, error)
+}
+
+type PlayerService interface {
+	LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequestDTO) (*entity.User, error)
+	PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponseDTO, error)
+	RemovePlayerData(ctx context.Context, playerID string) error
 }
