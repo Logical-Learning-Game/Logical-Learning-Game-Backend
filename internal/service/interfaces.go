@@ -15,7 +15,7 @@ type PlayerStatisticService interface {
 }
 
 type MapConfigurationService interface {
-	ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*entity.World, error)
+	ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*dto.WorldDTO, error)
 }
 
 type PlayerService interface {

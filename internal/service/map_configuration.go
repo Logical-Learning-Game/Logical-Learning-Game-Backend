@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"llg_backend/internal/dto"
+	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
 
 	"gorm.io/gorm"
@@ -17,7 +19,7 @@ func NewMapConfigurationService(db *gorm.DB) MapConfigurationService {
 	}
 }
 
-func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*entity.World, error) {
+func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*dto.WorldDTO, error) {
 	var mapConfigurationForPlayers []*entity.MapConfigurationForPlayer
 	result := s.db.WithContext(ctx).
 		Where(&entity.MapConfigurationForPlayer{PlayerID: playerID}).
@@ -54,5 +56,12 @@ func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, pl
 		}
 	}
 
-	return worlds, nil
+	worldMapper := mapper.NewWorldMapper()
+	worldDTOs := make([]*dto.WorldDTO, 0, len(worlds))
+	for _, world := range worlds {
+		worldDTO := worldMapper.ToDTO(world)
+		worldDTOs = append(worldDTOs, worldDTO)
+	}
+
+	return worldDTOs, nil
 }

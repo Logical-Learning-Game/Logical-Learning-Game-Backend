@@ -13,9 +13,7 @@ func NewRouter(handler *gin.Engine, db *gorm.DB) {
 
 	serverStatusController := NewServerStatusController()
 
-	apiGroup := handler.Group("/")
-	{
-		serverStatusController.initRoutes(apiGroup)
-		v1.NewRouter(apiGroup, db)
-	}
+	handler.Static("/static", "./static")
+	serverStatusController.initRoutes(&handler.RouterGroup)
+	v1.NewRouter(&handler.RouterGroup, db)
 }

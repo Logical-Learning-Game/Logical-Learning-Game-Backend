@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"llg_backend/internal/controller/http/httputil"
 	"llg_backend/internal/dto"
-	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/service"
 	"net/http"
 
@@ -47,17 +46,19 @@ func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	playerWorlds, err := c.mapConfigService.ListPlayerAvailableMaps(ctx, playerID)
+	worldDTOs, err := c.mapConfigService.ListPlayerAvailableMaps(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 
-	worldMapper := mapper.NewWorldMapper()
-	worldDTOs := make([]*dto.WorldDTO, 0, len(playerWorlds))
-	for _, world := range playerWorlds {
-		worldDTO := worldMapper.ToDTO(world)
-		worldDTOs = append(worldDTOs, worldDTO)
+	for _, world := range worldDTOs {
+		for i := range world.Maps {
+			if world.Maps[i].MapImagePath.Valid {
+				absoluteImagePath := httputil.AbsoluteImageURL(ctx, world.Maps[i].MapImagePath.String)
+				world.Maps[i].MapImagePath.String = absoluteImagePath
+			}
+		}
 	}
 
 	ctx.JSON(http.StatusOK, worldDTOs)
