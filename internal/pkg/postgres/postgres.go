@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	URI string `mapstructure:"POSTGRES_URI"`
+	URI   string `mapstructure:"POSTGRES_URI"`
+	Debug bool   `mapstructure:"GORM_DEBUG"`
 }
 
 func New(config *Config) (*gorm.DB, error) {
@@ -18,6 +19,10 @@ func New(config *Config) (*gorm.DB, error) {
 	if err != nil {
 		logger.GlobalLog.Errorw("connect to postgres failed", "err", err)
 		return nil, err
+	}
+
+	if config.Debug {
+		db = db.Debug()
 	}
 
 	logger.GlobalLog.Infof("connecting to postgres successful")

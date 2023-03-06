@@ -11,13 +11,13 @@ func NewSubmitHistoryMapper() SubmitHistoryMapper {
 	return SubmitHistoryMapper{}
 }
 
-func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.SubmitHistoryDTO {
+func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.SubmitHistoryResponse {
 	stateValueMapper := NewStateValueMapper()
 	submitHistoryRuleMapper := NewSubmitHistoryRuleMapper()
 	commandNodeMapper := NewCommandNodeMapper()
 	commandEdgeMapper := NewCommandEdgeMapper()
 
-	submitHistoryRuleDTOs := make([]*dto.SubmitHistoryRuleDTO, 0, len(submitHistory.SubmitHistoryRules))
+	submitHistoryRuleDTOs := make([]*dto.SubmitHistoryRuleResponse, 0, len(submitHistory.SubmitHistoryRules))
 	for _, v := range submitHistory.SubmitHistoryRules {
 		submitHistoryRuleDTO := submitHistoryRuleMapper.ToDTO(v)
 		submitHistoryRuleDTOs = append(submitHistoryRuleDTOs, submitHistoryRuleDTO)
@@ -35,7 +35,7 @@ func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.Sub
 		commandEdgeDTOs = append(commandEdgeDTOs, commandEdgeDTO)
 	}
 
-	submitHistoryDTO := &dto.SubmitHistoryDTO{
+	submitHistoryDTO := &dto.SubmitHistoryResponse{
 		IsFinited:          submitHistory.IsFinited,
 		IsCompleted:        submitHistory.IsCompleted,
 		CommandMedal:       submitHistory.CommandMedal,

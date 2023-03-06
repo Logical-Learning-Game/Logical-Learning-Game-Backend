@@ -2,9 +2,9 @@ package app
 
 import (
 	"llg_backend/config"
-	"llg_backend/internal/controller/http"
 	"llg_backend/internal/entity"
 	"llg_backend/internal/pkg/postgres"
+	"llg_backend/internal/presentation/controller/http"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
 	"log"

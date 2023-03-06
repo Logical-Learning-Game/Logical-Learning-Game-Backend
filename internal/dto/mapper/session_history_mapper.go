@@ -11,16 +11,16 @@ func NewSessionHistoryMapper() GameSessionMapper {
 	return GameSessionMapper{}
 }
 
-func (m GameSessionMapper) ToDTO(sessionHistory *entity.GameSession) *dto.SessionHistoryDTO {
+func (m GameSessionMapper) ToDTO(sessionHistory *entity.GameSession) *dto.SessionHistoryResponse {
 	submitHistoryMapper := NewSubmitHistoryMapper()
 
-	submitHistoryDTOs := make([]*dto.SubmitHistoryDTO, 0, len(sessionHistory.SubmitHistories))
+	submitHistoryDTOs := make([]*dto.SubmitHistoryResponse, 0, len(sessionHistory.SubmitHistories))
 	for _, v := range sessionHistory.SubmitHistories {
 		submitHistoryDTO := submitHistoryMapper.ToDTO(v)
 		submitHistoryDTOs = append(submitHistoryDTOs, submitHistoryDTO)
 	}
 
-	sessionHistoryDTO := &dto.SessionHistoryDTO{
+	sessionHistoryDTO := &dto.SessionHistoryResponse{
 		MapConfigurationID: sessionHistory.MapConfigurationID,
 		StartDatetime:      sessionHistory.StartDatetime,
 		EndDatetime:        sessionHistory.EndDatetime,

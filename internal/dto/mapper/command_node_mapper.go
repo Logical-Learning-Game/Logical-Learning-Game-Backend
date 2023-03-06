@@ -15,10 +15,8 @@ func (m CommandNodeMapper) ToDTO(commandNode *entity.CommandNode) *dto.CommandNo
 	commandNodeDTO := &dto.CommandNodeDTO{
 		NodeIndex: int(commandNode.Index),
 		Type:      commandNode.Type,
-		InGamePosition: dto.Vector2FloatDTO{
-			X: commandNode.InGamePosition.X,
-			Y: commandNode.InGamePosition.Y,
-		},
+		PositionX: commandNode.InGamePosition.X,
+		PositionY: commandNode.InGamePosition.Y,
 	}
 
 	return commandNodeDTO

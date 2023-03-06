@@ -20,7 +20,7 @@ func NewPlayerService(db *gorm.DB) PlayerService {
 	}
 }
 
-func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequestDTO) (*entity.User, error) {
+func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequest) (*entity.User, error) {
 	user := &entity.User{
 		PlayerID: linkAccountRequestDTO.PlayerID,
 		Email:    linkAccountRequestDTO.Email,
@@ -67,23 +67,26 @@ func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dt
 	return user, nil
 }
 
-func (s playerService) PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponseDTO, error) {
+func (s playerService) PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponse, error) {
 	var user entity.User
-	playerInfoResponseDTO := &dto.PlayerInfoResponseDTO{Found: false}
 
 	result := s.db.WithContext(ctx).
 		Where(&entity.User{PlayerID: playerID}).
 		First(&user)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return playerInfoResponseDTO, nil
+			return nil, ErrPlayerNotFound
 		} else {
-			return playerInfoResponseDTO, err
+			return nil, err
 		}
 	}
 
-	playerInfoResponseDTO.Found = true
-	return playerInfoResponseDTO, nil
+	playerInfoResponse := &dto.PlayerInfoResponse{
+		PlayerID: user.PlayerID,
+		Email:    user.Email,
+	}
+
+	return playerInfoResponse, nil
 }
 
 func (s playerService) RemovePlayerData(ctx context.Context, playerID string) error {

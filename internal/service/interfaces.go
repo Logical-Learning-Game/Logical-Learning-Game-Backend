@@ -7,11 +7,11 @@ import (
 )
 
 type PlayerStatisticService interface {
-	CreateSessionHistory(ctx context.Context, playerID string, arg dto.SessionHistoryDTO) (*entity.GameSession, error)
-	UpdateTopSubmitHistory(ctx context.Context, playerID string, args []*dto.TopSubmitHistoryDTO) ([]*entity.SubmitHistory, error)
-	ListPlayerSessionData(ctx context.Context, playerID string) ([]*dto.SessionHistoryDTO, error)
-	ListTopSubmitHistory(ctx context.Context, playerID string) ([]*dto.TopSubmitHistoryDTO, error)
-	GetPlayerData(ctx context.Context, playerID string) (*dto.SyncPlayerDataResponseDTO, error)
+	CreateSessionHistory(ctx context.Context, playerID string, arg dto.SessionHistoryRequest) (*entity.GameSession, error)
+	UpdateTopSubmitHistory(ctx context.Context, playerID string, args []*dto.TopSubmitHistoryRequest) ([]*entity.SubmitHistory, error)
+	ListPlayerSessionData(ctx context.Context, playerID string) ([]*dto.SessionHistoryResponse, error)
+	ListTopSubmitHistory(ctx context.Context, playerID string) ([]*dto.TopSubmitHistoryResponse, error)
+	GetPlayerData(ctx context.Context, playerID string) (*dto.PlayerDataDTO, error)
 }
 
 type MapConfigurationService interface {
@@ -19,7 +19,7 @@ type MapConfigurationService interface {
 }
 
 type PlayerService interface {
-	LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequestDTO) (*entity.User, error)
-	PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponseDTO, error)
+	LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequest) (*entity.User, error)
+	PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponse, error)
 	RemovePlayerData(ctx context.Context, playerID string) error
 }

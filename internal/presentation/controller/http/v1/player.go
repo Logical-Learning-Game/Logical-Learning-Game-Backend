@@ -3,8 +3,9 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"llg_backend/internal/controller/http/httputil"
 	"llg_backend/internal/dto"
+	"llg_backend/internal/presentation/controller/http/httputil"
+	"llg_backend/internal/presentation/presenter"
 	"llg_backend/internal/service"
 	"net/http"
 
@@ -67,7 +68,7 @@ func (c PlayerController) ListAvailableMaps(ctx *gin.Context) {
 func (c PlayerController) CreateSessionHistory(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	var createSessionHistoryRequestDTO dto.SessionHistoryDTO
+	var createSessionHistoryRequestDTO dto.SessionHistoryRequest
 	if err := ctx.ShouldBindJSON(&createSessionHistoryRequestDTO); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
@@ -98,7 +99,7 @@ func (c PlayerController) ListSessionHistory(ctx *gin.Context) {
 func (c PlayerController) UpdateTopSubmitHistory(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	var topSubmitHistoryDTO []*dto.TopSubmitHistoryDTO
+	var topSubmitHistoryDTO []*dto.TopSubmitHistoryRequest
 	if err := ctx.ShouldBindJSON(&topSubmitHistoryDTO); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
@@ -128,13 +129,16 @@ func (c PlayerController) ListTopSubmitHistory(ctx *gin.Context) {
 func (c PlayerController) GetPlayerData(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	syncPlayerDataDTO, err := c.statisticService.GetPlayerData(ctx, playerID)
+	playerDataDTO, err := c.statisticService.GetPlayerData(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, syncPlayerDataDTO)
+	playerDataPresenter := presenter.NewPlayerDataPresenter()
+	formattedPlayerData := playerDataPresenter.Present(playerID, playerDataDTO)
+
+	ctx.JSON(http.StatusOK, formattedPlayerData)
 }
 
 func (c PlayerController) RemovePlayerData(ctx *gin.Context) {
@@ -149,7 +153,7 @@ func (c PlayerController) RemovePlayerData(ctx *gin.Context) {
 }
 
 func (c PlayerController) LinkAccount(ctx *gin.Context) {
-	var linkAccountRequestDTO dto.LinkAccountRequestDTO
+	var linkAccountRequestDTO dto.LinkAccountRequest
 	if err := ctx.ShouldBindJSON(&linkAccountRequestDTO); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
 		return
@@ -173,11 +177,16 @@ func (c PlayerController) LinkAccount(ctx *gin.Context) {
 func (c PlayerController) PlayerInfo(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	playerInfoResponseDTO, err := c.playerService.PlayerInfo(ctx, playerID)
+	playerInfoResponse, err := c.playerService.PlayerInfo(ctx, playerID)
 	if err != nil {
+		if errors.Is(err, service.ErrPlayerNotFound) {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, httputil.ErrorResponse(err))
+			return
+		}
+
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, playerInfoResponseDTO)
+	ctx.JSON(http.StatusOK, playerInfoResponse)
 }

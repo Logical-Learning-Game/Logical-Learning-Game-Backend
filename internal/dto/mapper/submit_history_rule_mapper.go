@@ -11,9 +11,10 @@ func NewSubmitHistoryRuleMapper() SubmitHistoryRuleMapper {
 	return SubmitHistoryRuleMapper{}
 }
 
-func (m SubmitHistoryRuleMapper) ToDTO(submitHistoryRule *entity.SubmitHistoryRule) *dto.SubmitHistoryRuleDTO {
-	submitHistoryRuleDTO := &dto.SubmitHistoryRuleDTO{
+func (m SubmitHistoryRuleMapper) ToDTO(submitHistoryRule *entity.SubmitHistoryRule) *dto.SubmitHistoryRuleResponse {
+	submitHistoryRuleDTO := &dto.SubmitHistoryRuleResponse{
 		MapRuleID: submitHistoryRule.MapConfigurationRuleID,
+		Theme:     submitHistoryRule.MapConfigurationRule.Theme,
 		IsPass:    submitHistoryRule.IsPass,
 	}
 

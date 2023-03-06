@@ -1,7 +1,7 @@
 package http
 
 import (
-	v1 "llg_backend/internal/controller/http/v1"
+	"llg_backend/internal/presentation/controller/http/v1"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
