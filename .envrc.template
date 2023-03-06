@@ -2,7 +2,13 @@
 export SERVER_PORT={portnumber}
 
 # Postgres
-export POSTGRES_URI={uri}
+export POSTGRES_HOST={host}
+export POSTGRES_PORT={port}
+export POSTGRES_USER={user}
+export POSTGRES_PASSWORD={password}
+export POSTGRES_DB={db}
+export POSTGRES_SSL_MODE={mode}
+export GORM_DEBUG={false}
 
 # Google API
 export CLIENT_ID={clientID}
