@@ -302,13 +302,14 @@ func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playe
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
 	result := s.db.WithContext(ctx).
+		Where("player_id = ? AND start_datetime >= ?", playerID, sixMonthsAgo).
+		Order("start_datetime DESC").
 		Preload("SubmitHistories").
 		Preload("SubmitHistories.StateValue").
 		Preload("SubmitHistories.SubmitHistoryRules").
 		Preload("SubmitHistories.SubmitHistoryRules.MapConfigurationRule").
 		Preload("SubmitHistories.CommandNodes").
 		Preload("SubmitHistories.CommandEdges").
-		Where("player_id = ? AND start_datetime >= ?", playerID, sixMonthsAgo).
 		Find(&gameSessions)
 	if err := result.Error; err != nil {
 		return nil, err
