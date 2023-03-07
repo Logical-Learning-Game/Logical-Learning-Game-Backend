@@ -50,10 +50,9 @@ type Rule struct {
 }
 
 type World struct {
-	ID                         int64                        `gorm:"primaryKey"`
-	Name                       string                       `gorm:"type:varchar(255);not null"`
-	MapConfigurations          []*MapConfiguration          `gorm:"foreignKey:WorldID"`
-	MapConfigurationForPlayers []*MapConfigurationForPlayer `gorm:"-"`
+	ID                int64               `gorm:"primaryKey"`
+	Name              string              `gorm:"type:varchar(255);not null"`
+	MapConfigurations []*MapConfiguration `gorm:"foreignKey:WorldID"`
 }
 
 type MapConfiguration struct {

@@ -13,19 +13,17 @@ func NewWorldMapper() WorldMapper {
 }
 
 func (m WorldMapper) ToDTO(world *entity.World) *dto.WorldDTO {
-	mapConfigDTOs := make([]*dto.MapConfigurationDTO, 0, len(world.MapConfigurationForPlayers))
-	for _, mapConfig := range world.MapConfigurationForPlayers {
-		pqInt32Tile := mapConfig.MapConfiguration.Tile
+	mapConfigDTOs := make([]*dto.MapConfigurationDTO, 0, len(world.MapConfigurations))
+	for _, mapConfig := range world.MapConfigurations {
+		pqInt32Tile := mapConfig.Tile
 
 		intTile := make([]int, len(pqInt32Tile))
 		for i := range pqInt32Tile {
 			intTile[i] = int(pqInt32Tile[i])
 		}
 
-		mapConfiguration := mapConfig.MapConfiguration
-
-		rules := make([]*dto.RuleDTO, 0, len(mapConfiguration.Rules))
-		for _, rule := range mapConfiguration.Rules {
+		rules := make([]*dto.RuleDTO, 0, len(mapConfig.Rules))
+		for _, rule := range mapConfig.Rules {
 			pqInt32Parameter := rule.Parameters
 			intParameter := make([]int, len(pqInt32Parameter))
 			for i := range pqInt32Parameter {
@@ -43,20 +41,20 @@ func (m WorldMapper) ToDTO(world *entity.World) *dto.WorldDTO {
 		}
 
 		mapConfigDTO := &dto.MapConfigurationDTO{
-			MapID:                      mapConfiguration.ID,
-			MapName:                    mapConfiguration.ConfigName,
+			MapID:                      mapConfig.ID,
+			MapName:                    mapConfig.ConfigName,
 			Tile:                       intTile,
-			Height:                     int(mapConfig.MapConfiguration.Height),
-			Width:                      int(mapConfig.MapConfiguration.Width),
-			MapImagePath:               nullable.NullString{NullString: mapConfiguration.MapImagePath},
-			Difficulty:                 mapConfiguration.Difficulty,
-			StarRequirement:            int(mapConfiguration.StarRequirement),
-			LeastSolvableCommandGold:   int(mapConfiguration.LeastSolvableCommandGold),
-			LeastSolvableCommandSilver: int(mapConfiguration.LeastSolvableCommandSilver),
-			LeastSolvableCommandBronze: int(mapConfiguration.LeastSolvableCommandBronze),
-			LeastSolvableActionGold:    int(mapConfiguration.LeastSolvableActionGold),
-			LeastSolvableActionSilver:  int(mapConfiguration.LeastSolvableActionSilver),
-			LeastSolvableActionBronze:  int(mapConfiguration.LeastSolvableActionBronze),
+			Height:                     int(mapConfig.Height),
+			Width:                      int(mapConfig.Width),
+			MapImagePath:               nullable.NullString{NullString: mapConfig.MapImagePath},
+			Difficulty:                 mapConfig.Difficulty,
+			StarRequirement:            int(mapConfig.StarRequirement),
+			LeastSolvableCommandGold:   int(mapConfig.LeastSolvableCommandGold),
+			LeastSolvableCommandSilver: int(mapConfig.LeastSolvableCommandSilver),
+			LeastSolvableCommandBronze: int(mapConfig.LeastSolvableCommandBronze),
+			LeastSolvableActionGold:    int(mapConfig.LeastSolvableActionGold),
+			LeastSolvableActionSilver:  int(mapConfig.LeastSolvableActionSilver),
+			LeastSolvableActionBronze:  int(mapConfig.LeastSolvableActionBronze),
 			Rules:                      rules,
 		}
 

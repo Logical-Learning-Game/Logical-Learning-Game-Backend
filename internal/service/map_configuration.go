@@ -20,22 +20,24 @@ func NewMapConfigurationService(db *gorm.DB) MapConfigurationService {
 }
 
 func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*dto.WorldDTO, error) {
-	var mapConfigurationForPlayers []*entity.MapConfigurationForPlayer
+	var mapConfigurations []*entity.MapConfiguration
 	result := s.db.WithContext(ctx).
-		Where(&entity.MapConfigurationForPlayer{PlayerID: playerID}).
-		Joins("MapConfiguration").
-		Preload("MapConfiguration.Rules").
-		Find(&mapConfigurationForPlayers)
+		Table("map_configurations AS map").
+		Joins("INNER JOIN map_configuration_for_players AS map_player ON map_player.map_configuration_id = map.id").
+		Where("map_player.player_id = ?", playerID).
+		Order("map.id ASC").
+		Preload("Rules").
+		Find(&mapConfigurations)
 	if err := result.Error; err != nil {
 		return nil, err
 	}
 
 	worldIDSet := make(map[int64]struct{})
-	worldIDs := make([]int64, 0, len(mapConfigurationForPlayers))
-	for _, v := range mapConfigurationForPlayers {
-		if _, found := worldIDSet[v.MapConfiguration.WorldID]; !found {
-			worldIDs = append(worldIDs, v.MapConfiguration.WorldID)
-			worldIDSet[v.MapConfiguration.WorldID] = struct{}{}
+	worldIDs := make([]int64, 0, len(mapConfigurations))
+	for _, v := range mapConfigurations {
+		if _, found := worldIDSet[v.WorldID]; !found {
+			worldIDs = append(worldIDs, v.WorldID)
+			worldIDSet[v.WorldID] = struct{}{}
 		}
 	}
 
@@ -50,9 +52,9 @@ func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, pl
 		worldMap[v.ID] = v
 	}
 
-	for _, v := range mapConfigurationForPlayers {
-		if world, found := worldMap[v.MapConfiguration.WorldID]; found {
-			world.MapConfigurationForPlayers = append(world.MapConfigurationForPlayers, v)
+	for _, v := range mapConfigurations {
+		if world, found := worldMap[v.WorldID]; found {
+			world.MapConfigurations = append(world.MapConfigurations, v)
 		}
 	}
 
