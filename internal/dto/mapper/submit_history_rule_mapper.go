@@ -20,3 +20,12 @@ func (m SubmitHistoryRuleMapper) ToDTO(submitHistoryRule *entity.SubmitHistoryRu
 
 	return submitHistoryRuleDTO
 }
+
+func (m SubmitHistoryRuleMapper) ToEntity(submitHistoryRuleDTO *dto.SubmitHistoryRuleRequest) *entity.SubmitHistoryRule {
+	submitHistoryRule := &entity.SubmitHistoryRule{
+		MapConfigurationRuleID: submitHistoryRuleDTO.MapRuleID,
+		IsPass:                 submitHistoryRuleDTO.IsPass,
+	}
+
+	return submitHistoryRule
+}

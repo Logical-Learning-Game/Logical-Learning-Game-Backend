@@ -29,3 +29,22 @@ func (m StateValueMapper) ToDTO(stateValue *entity.StateValue) *dto.StateValueDT
 
 	return stateValueDTO
 }
+
+func (m StateValueMapper) ToEntity(stateValueDTO *dto.StateValueDTO) *entity.StateValue {
+	stateValue := &entity.StateValue{
+		CommandCount:          int32(stateValueDTO.CommandCount),
+		ForwardCommandCount:   int32(stateValueDTO.ForwardCommandCount),
+		RightCommandCount:     int32(stateValueDTO.RightCommandCount),
+		BackCommandCount:      int32(stateValueDTO.BackCommandCount),
+		LeftCommandCount:      int32(stateValueDTO.LeftCommandCount),
+		ConditionCommandCount: int32(stateValueDTO.ConditionCommandCount),
+		ActionCount:           int32(stateValueDTO.ActionCount),
+		ForwardActionCount:    int32(stateValueDTO.ForwardActionCount),
+		RightActionCount:      int32(stateValueDTO.RightActionCount),
+		BackActionCount:       int32(stateValueDTO.BackActionCount),
+		LeftActionCount:       int32(stateValueDTO.LeftActionCount),
+		ConditionActionCount:  int32(stateValueDTO.ConditionActionCount),
+	}
+
+	return stateValue
+}

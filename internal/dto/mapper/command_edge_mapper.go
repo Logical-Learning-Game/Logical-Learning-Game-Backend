@@ -20,3 +20,13 @@ func (m CommandEdgeMapper) ToDTO(commandEdge *entity.CommandEdge) *dto.CommandEd
 
 	return commandEdgeDTO
 }
+
+func (m CommandEdgeMapper) ToEntity(commandEdgeDTO *dto.CommandEdgeDTO) *entity.CommandEdge {
+	commandEdge := &entity.CommandEdge{
+		SourceNodeIndex:      int32(commandEdgeDTO.SourceNodeIndex),
+		DestinationNodeIndex: int32(commandEdgeDTO.DestinationNodeIndex),
+		Type:                 commandEdgeDTO.Type,
+	}
+
+	return commandEdge
+}

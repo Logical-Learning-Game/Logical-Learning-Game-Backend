@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
@@ -88,7 +89,7 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, player
 			for _, commandNodeDTO := range submitHistoryDTO.CommandNodes {
 				commandNode := &entity.CommandNode{
 					SubmitHistoryID: submitHistory.ID,
-					Index:           int32(commandNodeDTO.NodeIndex),
+					Index:           int32(commandNodeDTO.Index),
 					Type:            commandNodeDTO.Type,
 					InGamePosition: entity.Vector2Float32{
 						X: commandNodeDTO.PositionX,
@@ -134,28 +135,20 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 
 	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, entry := range args {
+			topSubmit := entry.SubmitHistory
+
 			// find map for player that need to update top submit history
 			var mapConfigurationForPlayer entity.MapConfigurationForPlayer
 			result := tx.Where(&entity.MapConfigurationForPlayer{
 				PlayerID:           playerID,
 				MapConfigurationID: entry.MapConfigurationID,
-			}).Find(&mapConfigurationForPlayer)
+			}).First(&mapConfigurationForPlayer)
 			if err := result.Error; err != nil {
 				return err
 			}
-
-			// remove old top submit history
-			result = tx.Where(&entity.SubmitHistory{
-				MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
-			}).Delete(&entity.SubmitHistory{})
-			if err := result.Error; err != nil {
-				return err
-			}
-
-			topSubmit := entry.SubmitHistory
 
 			// set is pass status to pass if top submit is completed
-			if topSubmit.IsCompleted {
+			if topSubmit.IsCompleted && !mapConfigurationForPlayer.IsPass {
 				mapConfigurationForPlayer.IsPass = true
 				result = tx.Save(&mapConfigurationForPlayer)
 				if err := result.Error; err != nil {
@@ -163,8 +156,42 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				}
 			}
 
+			// query old submit history if not found then immediate
+			var oldTopSubmitHistory entity.SubmitHistory
+			foundOldTopSubmitHistory := true
+			result = tx.Where(&entity.SubmitHistory{
+				MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
+			}).
+				Joins("StateValue").
+				Preload("SubmitHistoryRules").
+				First(&oldTopSubmitHistory)
+			if err := result.Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					foundOldTopSubmitHistory = false
+				} else {
+					return err
+				}
+			}
+
+			if foundOldTopSubmitHistory {
+				// compare old submit history with new submit history
+				submitHistoryMapper := mapper.NewSubmitHistoryMapper()
+				newSubmitHistoryToCompare := submitHistoryMapper.ToEntity(entry.SubmitHistory)
+				if !compareSubmitHistory(&oldTopSubmitHistory, newSubmitHistoryToCompare) {
+					continue
+				} else {
+					// remove old top submit history
+					result = tx.Where(&entity.SubmitHistory{
+						MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
+					}).Delete(&entity.SubmitHistory{})
+					if err := result.Error; err != nil {
+						return err
+					}
+				}
+			}
+
 			// insert new top submit history
-			submitHistory := &entity.SubmitHistory{
+			newSubmitHistory := &entity.SubmitHistory{
 				MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
 				IsFinited:                   topSubmit.IsFinited,
 				IsCompleted:                 topSubmit.IsCompleted,
@@ -173,7 +200,7 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				SubmitDatetime:              topSubmit.SubmitDatetime,
 			}
 
-			result = tx.Omit("GameSessionID").Create(submitHistory)
+			result = tx.Omit("GameSessionID").Create(newSubmitHistory)
 			if err := result.Error; err != nil {
 				return err
 			}
@@ -181,7 +208,7 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 			// insert new state value
 			topSubmitStateValue := topSubmit.StateValue
 			stateValue := &entity.StateValue{
-				SubmitHistoryID:       submitHistory.ID,
+				SubmitHistoryID:       newSubmitHistory.ID,
 				CommandCount:          int32(topSubmitStateValue.CommandCount),
 				ForwardCommandCount:   int32(topSubmitStateValue.ForwardCommandCount),
 				RightCommandCount:     int32(topSubmitStateValue.RightCommandCount),
@@ -201,12 +228,12 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				return err
 			}
 
-			submitHistory.StateValue = stateValue
+			newSubmitHistory.StateValue = stateValue
 
 			// insert new submit history rules
 			for _, ruleDTO := range topSubmit.SubmitHistoryRules {
 				rule := &entity.SubmitHistoryRule{
-					SubmitHistoryID:        submitHistory.ID,
+					SubmitHistoryID:        newSubmitHistory.ID,
 					MapConfigurationRuleID: ruleDTO.MapRuleID,
 					IsPass:                 ruleDTO.IsPass,
 				}
@@ -216,14 +243,14 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 					return err
 				}
 
-				submitHistory.SubmitHistoryRules = append(submitHistory.SubmitHistoryRules, rule)
+				newSubmitHistory.SubmitHistoryRules = append(newSubmitHistory.SubmitHistoryRules, rule)
 			}
 
 			// insert new command node
 			for _, commandNodeDTO := range topSubmit.CommandNodes {
 				commandNode := &entity.CommandNode{
-					SubmitHistoryID: submitHistory.ID,
-					Index:           int32(commandNodeDTO.NodeIndex),
+					SubmitHistoryID: newSubmitHistory.ID,
+					Index:           int32(commandNodeDTO.Index),
 					Type:            commandNodeDTO.Type,
 					InGamePosition: entity.Vector2Float32{
 						X: commandNodeDTO.PositionX,
@@ -236,13 +263,13 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 					return err
 				}
 
-				submitHistory.CommandNodes = append(submitHistory.CommandNodes, commandNode)
+				newSubmitHistory.CommandNodes = append(newSubmitHistory.CommandNodes, commandNode)
 			}
 
 			// insert new command edge
 			for _, commandEdgeDTO := range topSubmit.CommandEdges {
 				commandEdge := &entity.CommandEdge{
-					SubmitHistoryID:      submitHistory.ID,
+					SubmitHistoryID:      newSubmitHistory.ID,
 					SourceNodeIndex:      int32(commandEdgeDTO.SourceNodeIndex),
 					DestinationNodeIndex: int32(commandEdgeDTO.DestinationNodeIndex),
 					Type:                 commandEdgeDTO.Type,
@@ -253,10 +280,10 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 					return err
 				}
 
-				submitHistory.CommandEdges = append(submitHistory.CommandEdges, commandEdge)
+				newSubmitHistory.CommandEdges = append(newSubmitHistory.CommandEdges, commandEdge)
 			}
 
-			insertedTopSubmitHistories = append(insertedTopSubmitHistories, submitHistory)
+			insertedTopSubmitHistories = append(insertedTopSubmitHistories, newSubmitHistory)
 		}
 
 		return nil
@@ -343,4 +370,55 @@ func (s playerStatisticService) GetPlayerData(ctx context.Context, playerID stri
 	}
 
 	return syncPlayerDataDTO, nil
+}
+
+// compareSubmitHistory will return true if newSubmitHistory is better than oldSubmitHistory otherwise false
+func compareSubmitHistory(oldSubmitHistory, newSubmitHistory *entity.SubmitHistory) bool {
+	if newSubmitHistory.IsCompleted && !oldSubmitHistory.IsCompleted {
+		return true
+	} else if !newSubmitHistory.IsCompleted && oldSubmitHistory.IsCompleted {
+		return false
+	} else {
+		// compare rule histories
+		oldRulePass := 0
+		newRulePass := 0
+		for i := 0; i < len(newSubmitHistory.SubmitHistoryRules); i++ {
+			if newSubmitHistory.SubmitHistoryRules[i].IsPass {
+				newRulePass++
+			}
+
+			if oldSubmitHistory.SubmitHistoryRules[i].IsPass {
+				oldRulePass++
+			}
+		}
+
+		if newRulePass > oldRulePass {
+			return true
+		} else if newRulePass < oldRulePass {
+			return false
+		} else {
+			// compare command medal
+			if entity.MedalValue[newSubmitHistory.CommandMedal] > entity.MedalValue[oldSubmitHistory.CommandMedal] {
+				return true
+			} else if entity.MedalValue[newSubmitHistory.CommandMedal] < entity.MedalValue[oldSubmitHistory.CommandMedal] {
+				return false
+			} else {
+				// compare action medal
+				if entity.MedalValue[newSubmitHistory.ActionMedal] > entity.MedalValue[oldSubmitHistory.ActionMedal] {
+					return true
+				} else if entity.MedalValue[newSubmitHistory.ActionMedal] < entity.MedalValue[oldSubmitHistory.ActionMedal] {
+					return false
+				} else {
+					// compare state value
+					if newSubmitHistory.StateValue.CommandCount < oldSubmitHistory.StateValue.CommandCount {
+						return true
+					} else if newSubmitHistory.StateValue.CommandCount > oldSubmitHistory.StateValue.CommandCount {
+						return false
+					} else {
+						return newSubmitHistory.StateValue.ActionCount < oldSubmitHistory.StateValue.ActionCount
+					}
+				}
+			}
+		}
+	}
 }

@@ -57,7 +57,7 @@ type SubmitHistoryRuleResponse struct {
 }
 
 type CommandNodeDTO struct {
-	NodeIndex int                    `json:"index"`
+	Index     int                    `json:"index"`
 	Type      entity.CommandNodeType `json:"type"`
 	PositionX float32                `json:"x"`
 	PositionY float32                `json:"y"`

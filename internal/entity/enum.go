@@ -161,6 +161,15 @@ const (
 	MedalTypeNone   MedalType = "none"
 )
 
+var (
+	MedalValue = map[MedalType]int{
+		MedalTypeGold:   3,
+		MedalTypeSilver: 2,
+		MedalTypeBronze: 1,
+		MedalTypeNone:   0,
+	}
+)
+
 func (i *MedalType) Scan(value interface{}) error {
 	switch t := value.(type) {
 	case []byte:

@@ -49,3 +49,42 @@ func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.Sub
 
 	return submitHistoryDTO
 }
+
+func (m SubmitHistoryMapper) ToEntity(submitHistoryDTO *dto.SubmitHistoryRequest) *entity.SubmitHistory {
+	stateValueMapper := NewStateValueMapper()
+	submitHistoryRuleMapper := NewSubmitHistoryRuleMapper()
+	commandNodeMapper := NewCommandNodeMapper()
+	commandEdgeMapper := NewCommandEdgeMapper()
+
+	submitHistoryRules := make([]*entity.SubmitHistoryRule, 0, len(submitHistoryDTO.SubmitHistoryRules))
+	for _, v := range submitHistoryDTO.SubmitHistoryRules {
+		submitHistoryRule := submitHistoryRuleMapper.ToEntity(v)
+		submitHistoryRules = append(submitHistoryRules, submitHistoryRule)
+	}
+
+	commandNodes := make([]*entity.CommandNode, 0, len(submitHistoryDTO.CommandNodes))
+	for _, v := range submitHistoryDTO.CommandNodes {
+		commandNode := commandNodeMapper.ToEntity(v)
+		commandNodes = append(commandNodes, commandNode)
+	}
+
+	commandEdges := make([]*entity.CommandEdge, 0, len(submitHistoryDTO.CommandEdges))
+	for _, v := range submitHistoryDTO.CommandEdges {
+		commandEdge := commandEdgeMapper.ToEntity(v)
+		commandEdges = append(commandEdges, commandEdge)
+	}
+
+	submitHistory := &entity.SubmitHistory{
+		IsFinited:          submitHistoryDTO.IsFinited,
+		IsCompleted:        submitHistoryDTO.IsCompleted,
+		CommandMedal:       submitHistoryDTO.CommandMedal,
+		ActionMedal:        submitHistoryDTO.ActionMedal,
+		SubmitDatetime:     submitHistoryDTO.SubmitDatetime,
+		StateValue:         stateValueMapper.ToEntity(submitHistoryDTO.StateValue),
+		SubmitHistoryRules: submitHistoryRules,
+		CommandNodes:       commandNodes,
+		CommandEdges:       commandEdges,
+	}
+
+	return submitHistory
+}
