@@ -176,14 +176,12 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 			if foundOldTopSubmitHistory {
 				// compare old submit history with new submit history
 				submitHistoryMapper := mapper.NewSubmitHistoryMapper()
-				newSubmitHistoryToCompare := submitHistoryMapper.ToEntity(entry.SubmitHistory)
+				newSubmitHistoryToCompare := submitHistoryMapper.ToEntity(topSubmit)
 				if !compareSubmitHistory(&oldTopSubmitHistory, newSubmitHistoryToCompare) {
 					continue
 				} else {
 					// remove old top submit history
-					result = tx.Where(&entity.SubmitHistory{
-						MapConfigurationForPlayerID: mapConfigurationForPlayer.ID,
-					}).Delete(&entity.SubmitHistory{})
+					result = tx.Delete(&entity.SubmitHistory{}, oldTopSubmitHistory.ID)
 					if err := result.Error; err != nil {
 						return err
 					}
