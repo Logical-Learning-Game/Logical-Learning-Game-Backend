@@ -20,6 +20,10 @@ func NewPlayerService(db *gorm.DB) PlayerService {
 	}
 }
 
+var (
+	defaultMaps = []int64{1, 2, 3, 4, 5, 6, 7}
+)
+
 func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequest) (*entity.User, error) {
 	user := &entity.User{
 		PlayerID: linkAccountRequestDTO.PlayerID,
@@ -32,24 +36,16 @@ func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dt
 			return err
 		}
 
-		mapsForPlayer := []*entity.MapConfigurationForPlayer{
-			{
+		initialDefaultMaps := make([]*entity.MapConfigurationForPlayer, 0, len(defaultMaps))
+		for _, v := range defaultMaps {
+			initialDefaultMaps = append(initialDefaultMaps, &entity.MapConfigurationForPlayer{
 				PlayerID:           linkAccountRequestDTO.PlayerID,
-				MapConfigurationID: 1,
+				MapConfigurationID: v,
 				IsPass:             false,
-			},
-			{
-				PlayerID:           linkAccountRequestDTO.PlayerID,
-				MapConfigurationID: 2,
-				IsPass:             false,
-			},
-			{
-				PlayerID:           linkAccountRequestDTO.PlayerID,
-				MapConfigurationID: 3,
-				IsPass:             false,
-			},
+			})
 		}
-		result = tx.Create(&mapsForPlayer)
+
+		result = tx.Create(&initialDefaultMaps)
 
 		return result.Error
 	})
