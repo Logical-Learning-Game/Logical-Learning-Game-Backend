@@ -11,7 +11,11 @@ func NewSubmitHistoryMapper() SubmitHistoryMapper {
 	return SubmitHistoryMapper{}
 }
 
-func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.SubmitHistoryResponse {
+func (m SubmitHistoryMapper) ToSubmitHistoryResponse(submitHistory *entity.SubmitHistory) *dto.SubmitHistoryResponse {
+	if submitHistory == nil {
+		return nil
+	}
+
 	stateValueMapper := NewStateValueMapper()
 	submitHistoryRuleMapper := NewSubmitHistoryRuleMapper()
 	commandNodeMapper := NewCommandNodeMapper()
@@ -19,7 +23,7 @@ func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.Sub
 
 	submitHistoryRuleDTOs := make([]*dto.SubmitHistoryRuleResponse, 0, len(submitHistory.SubmitHistoryRules))
 	for _, v := range submitHistory.SubmitHistoryRules {
-		submitHistoryRuleDTO := submitHistoryRuleMapper.ToDTO(v)
+		submitHistoryRuleDTO := submitHistoryRuleMapper.ToSubmitHistoryRuleResponse(v)
 		submitHistoryRuleDTOs = append(submitHistoryRuleDTOs, submitHistoryRuleDTO)
 	}
 
@@ -50,7 +54,55 @@ func (m SubmitHistoryMapper) ToDTO(submitHistory *entity.SubmitHistory) *dto.Sub
 	return submitHistoryDTO
 }
 
+func (m SubmitHistoryMapper) ToSubmitHistoryForAdminResponse(submitHistory *entity.SubmitHistory) *dto.SubmitHistoryForAdminResponse {
+	if submitHistory == nil {
+		return nil
+	}
+
+	commandNodeMapper := NewCommandNodeMapper()
+	commandEdgeMapper := NewCommandEdgeMapper()
+	stateValueMapper := NewStateValueMapper()
+	submitHistoryRuleMapper := NewSubmitHistoryRuleMapper()
+
+	commandNodeDTOs := make([]*dto.CommandNodeDTO, 0, len(submitHistory.CommandNodes))
+	for _, v := range submitHistory.CommandNodes {
+		n := commandNodeMapper.ToDTO(v)
+		commandNodeDTOs = append(commandNodeDTOs, n)
+	}
+
+	commandEdgeDTOs := make([]*dto.CommandEdgeDTO, 0, len(submitHistory.CommandEdges))
+	for _, v := range submitHistory.CommandEdges {
+		e := commandEdgeMapper.ToDTO(v)
+		commandEdgeDTOs = append(commandEdgeDTOs, e)
+	}
+
+	submitHistoryRuleDTOs := make([]*dto.SubmitHistoryRuleForAdminResponse, 0, len(submitHistory.SubmitHistoryRules))
+	for _, v := range submitHistory.SubmitHistoryRules {
+		s := submitHistoryRuleMapper.ToSubmitHistoryRuleForAdminResponse(v)
+		submitHistoryRuleDTOs = append(submitHistoryRuleDTOs, s)
+	}
+
+	submitHistoryForAdminResponse := &dto.SubmitHistoryForAdminResponse{
+		SubmitHistoryID:    submitHistory.ID,
+		IsFinited:          submitHistory.IsFinited,
+		IsCompleted:        submitHistory.IsCompleted,
+		CommandMedal:       submitHistory.CommandMedal,
+		ActionMedal:        submitHistory.ActionMedal,
+		SubmitDatetime:     submitHistory.SubmitDatetime,
+		StateValue:         stateValueMapper.ToDTO(submitHistory.StateValue),
+		SubmitHistoryRules: submitHistoryRuleDTOs,
+		CommandNodes:       commandNodeDTOs,
+		CommandEdges:       commandEdgeDTOs,
+	}
+
+	return submitHistoryForAdminResponse
+}
+
 func (m SubmitHistoryMapper) ToEntity(submitHistoryDTO *dto.SubmitHistoryRequest) *entity.SubmitHistory {
+	if submitHistoryDTO == nil {
+		return nil
+	}
+
 	stateValueMapper := NewStateValueMapper()
 	submitHistoryRuleMapper := NewSubmitHistoryRuleMapper()
 	commandNodeMapper := NewCommandNodeMapper()

@@ -12,6 +12,10 @@ func NewCommandNodeMapper() CommandNodeMapper {
 }
 
 func (m CommandNodeMapper) ToDTO(commandNode *entity.CommandNode) *dto.CommandNodeDTO {
+	if commandNode == nil {
+		return nil
+	}
+
 	commandNodeDTO := &dto.CommandNodeDTO{
 		Index:     int(commandNode.Index),
 		Type:      commandNode.Type,
@@ -23,6 +27,10 @@ func (m CommandNodeMapper) ToDTO(commandNode *entity.CommandNode) *dto.CommandNo
 }
 
 func (m CommandNodeMapper) ToEntity(commandNodeDTO *dto.CommandNodeDTO) *entity.CommandNode {
+	if commandNodeDTO == nil {
+		return nil
+	}
+
 	commandNode := &entity.CommandNode{
 		Index: int32(commandNodeDTO.Index),
 		Type:  commandNodeDTO.Type,

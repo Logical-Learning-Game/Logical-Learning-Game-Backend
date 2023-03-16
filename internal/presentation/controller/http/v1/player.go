@@ -32,7 +32,7 @@ func (c PlayerController) initRoutes(handler *gin.RouterGroup) {
 		h.POST("/link_account", c.LinkAccount)
 		playerGroup := h.Group("/:playerID")
 		{
-			playerGroup.GET("/", c.PlayerInfo)
+			playerGroup.GET("", c.PlayerInfo)
 			playerGroup.GET("/game_data", c.GetPlayerData)
 			playerGroup.DELETE("/game_data", c.RemovePlayerData)
 			playerGroup.GET("/session_history", c.ListSessionHistory)
@@ -87,7 +87,7 @@ func (c PlayerController) CreateSessionHistory(ctx *gin.Context) {
 func (c PlayerController) ListSessionHistory(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
-	sessionHistoryDTOs, err := c.statisticService.ListPlayerSessionData(ctx, playerID)
+	sessionHistoryDTOs, err := c.statisticService.ListPlayerSessionDataForGame(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return

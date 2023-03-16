@@ -58,6 +58,7 @@ type World struct {
 type MapConfiguration struct {
 	ID                         int64                   `gorm:"primaryKey"`
 	WorldID                    int64                   `gorm:"not null"`
+	World                      *World                  `gorm:"foreignKey:WorldID"`
 	ConfigName                 string                  `gorm:"type:varchar(255);not null"`
 	Tile                       pq.Int32Array           `gorm:"type:integer[];not null"`
 	Height                     int32                   `gorm:"not null"`

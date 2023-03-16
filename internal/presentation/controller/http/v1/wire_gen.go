@@ -22,6 +22,14 @@ func InitializePlayerController(db *gorm.DB) *PlayerController {
 	return playerController
 }
 
+func InitializeAdminController(db *gorm.DB) *AdminController {
+	mapConfigurationService := service.NewMapConfigurationService(db)
+	playerStatisticService := service.NewPlayerStatisticService(db)
+	playerService := service.NewPlayerService(db)
+	adminController := NewAdminController(mapConfigurationService, playerStatisticService, playerService)
+	return adminController
+}
+
 // wire.go:
 
 var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService, service.NewPlayerService)

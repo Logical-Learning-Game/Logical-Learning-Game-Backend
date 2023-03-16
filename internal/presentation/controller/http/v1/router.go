@@ -7,9 +7,11 @@ import (
 
 func NewRouter(handler *gin.RouterGroup, db *gorm.DB) {
 	playerController := InitializePlayerController(db)
+	adminController := InitializeAdminController(db)
 
 	h := handler.Group("/v1")
 	{
 		playerController.initRoutes(h)
+		adminController.initRoutes(h)
 	}
 }

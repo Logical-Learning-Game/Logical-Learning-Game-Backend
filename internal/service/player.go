@@ -80,6 +80,7 @@ func (s playerService) PlayerInfo(ctx context.Context, playerID string) (*dto.Pl
 	playerInfoResponse := &dto.PlayerInfoResponse{
 		PlayerID: user.PlayerID,
 		Email:    user.Email,
+		Name:     "mockName",
 	}
 
 	return playerInfoResponse, nil
@@ -108,4 +109,25 @@ func (s playerService) RemovePlayerData(ctx context.Context, playerID string) er
 	})
 
 	return txErr
+}
+
+func (s playerService) ListPlayers(ctx context.Context) ([]*dto.PlayerInfoResponse, error) {
+	users := make([]*entity.User, 0)
+
+	result := s.db.WithContext(ctx).
+		Find(&users)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	playerInfoResponses := make([]*dto.PlayerInfoResponse, 0, len(users))
+	for _, v := range users {
+		playerInfoResponses = append(playerInfoResponses, &dto.PlayerInfoResponse{
+			PlayerID: v.PlayerID,
+			Email:    v.Email,
+			Name:     "mockName",
+		})
+	}
+
+	return playerInfoResponses, nil
 }

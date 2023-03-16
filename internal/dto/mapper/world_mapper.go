@@ -13,7 +13,12 @@ func NewWorldMapper() WorldMapper {
 }
 
 func (m WorldMapper) ToDTO(world *entity.World) *dto.WorldDTO {
+	if world == nil {
+		return nil
+	}
+
 	mapConfigDTOs := make([]*dto.MapConfigurationDTO, 0, len(world.MapConfigurations))
+	ruleMapper := NewRuleMapper()
 	for _, mapConfig := range world.MapConfigurations {
 		pqInt32Tile := mapConfig.Tile
 
@@ -24,20 +29,8 @@ func (m WorldMapper) ToDTO(world *entity.World) *dto.WorldDTO {
 
 		rules := make([]*dto.RuleDTO, 0, len(mapConfig.Rules))
 		for _, rule := range mapConfig.Rules {
-			pqInt32Parameter := rule.Parameters
-			intParameter := make([]int, len(pqInt32Parameter))
-			for i := range pqInt32Parameter {
-				intParameter[i] = int(pqInt32Parameter[i])
-			}
-
-			ruleDTO := &dto.RuleDTO{
-				MapRuleID:  rule.ID,
-				RuleName:   rule.RuleName,
-				Theme:      rule.Theme,
-				Parameters: intParameter,
-			}
-
-			rules = append(rules, ruleDTO)
+			r := ruleMapper.ToDTO(rule)
+			rules = append(rules, r)
 		}
 
 		mapConfigDTO := &dto.MapConfigurationDTO{

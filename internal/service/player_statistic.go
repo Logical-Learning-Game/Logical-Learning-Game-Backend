@@ -6,6 +6,7 @@ import (
 	"llg_backend/internal/dto"
 	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
+	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -315,14 +316,14 @@ func (s playerStatisticService) ListTopSubmitHistory(ctx context.Context, player
 	for _, v := range mapConfigurationForPlayers {
 		topSubmitHistoryDTOs = append(topSubmitHistoryDTOs, &dto.TopSubmitHistoryResponse{
 			MapConfigurationID: v.MapConfigurationID,
-			SubmitHistory:      submitHistoryMapper.ToDTO(v.TopSubmitHistory),
+			SubmitHistory:      submitHistoryMapper.ToSubmitHistoryResponse(v.TopSubmitHistory),
 		})
 	}
 
 	return topSubmitHistoryDTOs, nil
 }
 
-func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playerID string) ([]*dto.SessionHistoryResponse, error) {
+func (s playerStatisticService) ListPlayerSessionDataForGame(ctx context.Context, playerID string) ([]*dto.SessionHistoryForGameResponse, error) {
 	gameSessions := make([]*entity.GameSession, 0)
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
@@ -342,7 +343,7 @@ func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playe
 
 	sessionHistoryMapper := mapper.NewSessionHistoryMapper()
 
-	sessionHistoryDTOs := make([]*dto.SessionHistoryResponse, 0, len(gameSessions))
+	sessionHistoryDTOs := make([]*dto.SessionHistoryForGameResponse, 0, len(gameSessions))
 	for _, v := range gameSessions {
 		sessionHistoryDTO := sessionHistoryMapper.ToDTO(v)
 		sessionHistoryDTOs = append(sessionHistoryDTOs, sessionHistoryDTO)
@@ -351,8 +352,137 @@ func (s playerStatisticService) ListPlayerSessionData(ctx context.Context, playe
 	return sessionHistoryDTOs, nil
 }
 
+func (s playerStatisticService) ListPlayerSessionForAdmin(ctx context.Context, playerID string) ([]*dto.SessionDataForAdminResponse, error) {
+	gameSessions := make([]*entity.GameSession, 0)
+
+	result := s.db.WithContext(ctx).
+		Joins("MapConfiguration").
+		Where(&entity.GameSession{
+			PlayerID: playerID,
+		}).
+		Order("start_datetime DESC").
+		Preload("MapConfiguration.World").
+		Preload("SubmitHistories", func(db *gorm.DB) *gorm.DB {
+			return db.Order("submit_datetime DESC")
+		}).
+		Preload("SubmitHistories.StateValue").
+		Preload("SubmitHistories.SubmitHistoryRules").
+		Preload("SubmitHistories.SubmitHistoryRules.MapConfigurationRule").
+		Preload("SubmitHistories.CommandNodes").
+		Preload("SubmitHistories.CommandEdges").
+		Find(&gameSessions)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	submitHistoryMapper := mapper.NewSubmitHistoryMapper()
+	sessionDataForAdmins := make([]*dto.SessionDataForAdminResponse, 0, len(gameSessions))
+	for _, session := range gameSessions {
+		submitHistoryForAdmins := make([]*dto.SubmitHistoryForAdminResponse, 0, len(session.SubmitHistories))
+
+		for _, submit := range session.SubmitHistories {
+			submitForAdmin := submitHistoryMapper.ToSubmitHistoryForAdminResponse(submit)
+			submitHistoryForAdmins = append(submitHistoryForAdmins, submitForAdmin)
+		}
+
+		sessionDataForAdmins = append(sessionDataForAdmins, &dto.SessionDataForAdminResponse{
+			SessionID:       session.ID,
+			WorldID:         session.MapConfiguration.WorldID,
+			WorldName:       session.MapConfiguration.World.Name,
+			MapID:           session.MapConfigurationID,
+			MapName:         session.MapConfiguration.ConfigName,
+			StartDatetime:   session.StartDatetime,
+			EndDatetime:     session.EndDatetime,
+			SubmitHistories: submitHistoryForAdmins,
+		})
+	}
+
+	return sessionDataForAdmins, nil
+}
+
+func (s playerStatisticService) ListSubmitHistoriesForAdmin(ctx context.Context, sessionID int64) ([]*dto.SubmitHistoryForAdminResponse, error) {
+	submitHistories := make([]*entity.SubmitHistory, 0)
+
+	result := s.db.WithContext(ctx).
+		Joins("StateValue").
+		Where(&entity.SubmitHistory{
+			GameSessionID: sessionID,
+		}).
+		Preload("SubmitHistoryRules").
+		Preload("SubmitHistoryRules.MapConfigurationRule").
+		Preload("CommandNodes").
+		Preload("CommandEdges").
+		Find(&submitHistories)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	submitHistoryMapper := mapper.NewSubmitHistoryMapper()
+
+	submitHistoryForAdmins := make([]*dto.SubmitHistoryForAdminResponse, 0, len(submitHistories))
+	for _, v := range submitHistories {
+		submitForAdmin := submitHistoryMapper.ToSubmitHistoryForAdminResponse(v)
+		submitHistoryForAdmins = append(submitHistoryForAdmins, submitForAdmin)
+	}
+
+	return submitHistoryForAdmins, nil
+}
+
+func (s playerStatisticService) ListMapOfPlayerInfoForAdmin(ctx context.Context, playerID string) ([]*dto.MapOfPlayerInfoForAdminResponse, error) {
+	mapConfigurationForPlayers := make([]*entity.MapConfigurationForPlayer, 0)
+
+	result := s.db.WithContext(ctx).
+		Joins("MapConfiguration").
+		Joins("TopSubmitHistory").
+		Where(&entity.MapConfigurationForPlayer{
+			PlayerID: playerID,
+		}).
+		Preload("MapConfiguration.World").
+		Preload("TopSubmitHistory.StateValue").
+		Preload("TopSubmitHistory.SubmitHistoryRules").
+		Preload("TopSubmitHistory.SubmitHistoryRules.MapConfigurationRule").
+		Preload("TopSubmitHistory.CommandNodes").
+		Preload("TopSubmitHistory.CommandEdges").
+		Find(&mapConfigurationForPlayers)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	// sort by world's id and map's id field
+	sort.SliceStable(mapConfigurationForPlayers, func(i, j int) bool {
+		if mapConfigurationForPlayers[i].MapConfiguration.WorldID != mapConfigurationForPlayers[j].MapConfiguration.WorldID {
+			return mapConfigurationForPlayers[i].MapConfiguration.WorldID < mapConfigurationForPlayers[j].MapConfiguration.WorldID
+		}
+		return mapConfigurationForPlayers[i].MapConfigurationID < mapConfigurationForPlayers[j].MapConfigurationID
+	})
+
+	submitHistoryMapper := mapper.NewSubmitHistoryMapper()
+
+	mapOfPlayerInfoResponse := make([]*dto.MapOfPlayerInfoForAdminResponse, 0, len(mapConfigurationForPlayers))
+	for _, v := range mapConfigurationForPlayers {
+		var submit *dto.SubmitHistoryForAdminResponse
+		if v.TopSubmitHistory != nil {
+			submit = submitHistoryMapper.ToSubmitHistoryForAdminResponse(v.TopSubmitHistory)
+		}
+
+		m := &dto.MapOfPlayerInfoForAdminResponse{
+			MapForPlayerID:   v.ID,
+			WorldID:          v.MapConfiguration.WorldID,
+			WorldName:        v.MapConfiguration.World.Name,
+			MapID:            v.MapConfigurationID,
+			MapName:          v.MapConfiguration.ConfigName,
+			IsPass:           v.IsPass,
+			TopSubmitHistory: submit,
+		}
+
+		mapOfPlayerInfoResponse = append(mapOfPlayerInfoResponse, m)
+	}
+
+	return mapOfPlayerInfoResponse, nil
+}
+
 func (s playerStatisticService) GetPlayerData(ctx context.Context, playerID string) (*dto.PlayerDataDTO, error) {
-	sessionHistoryDTOs, err := s.ListPlayerSessionData(ctx, playerID)
+	sessionHistoryDTOs, err := s.ListPlayerSessionDataForGame(ctx, playerID)
 	if err != nil {
 		return nil, err
 	}

@@ -22,3 +22,11 @@ func InitializePlayerController(db *gorm.DB) *PlayerController {
 	)
 	return &PlayerController{}
 }
+
+func InitializeAdminController(db *gorm.DB) *AdminController {
+	wire.Build(
+		NewAdminController,
+		providerSet,
+	)
+	return &AdminController{}
+}

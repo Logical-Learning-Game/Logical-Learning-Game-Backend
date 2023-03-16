@@ -12,6 +12,10 @@ func NewStateValueMapper() *StateValueMapper {
 }
 
 func (m StateValueMapper) ToDTO(stateValue *entity.StateValue) *dto.StateValueDTO {
+	if stateValue == nil {
+		return nil
+	}
+
 	stateValueDTO := &dto.StateValueDTO{
 		CommandCount:          int(stateValue.CommandCount),
 		ForwardCommandCount:   int(stateValue.ForwardCommandCount),
@@ -31,6 +35,10 @@ func (m StateValueMapper) ToDTO(stateValue *entity.StateValue) *dto.StateValueDT
 }
 
 func (m StateValueMapper) ToEntity(stateValueDTO *dto.StateValueDTO) *entity.StateValue {
+	if stateValueDTO == nil {
+		return nil
+	}
+
 	stateValue := &entity.StateValue{
 		CommandCount:          int32(stateValueDTO.CommandCount),
 		ForwardCommandCount:   int32(stateValueDTO.ForwardCommandCount),
