@@ -7,14 +7,12 @@ import (
 )
 
 type Config struct {
-	HTTP      HTTP            `mapstructure:",squash"`
-	Postgres  postgres.Config `mapstructure:",squash"`
+	HTTP     HTTP            `mapstructure:",squash"`
+	Postgres postgres.Config `mapstructure:",squash"`
 }
 
 type HTTP struct {
 	Port string `mapstructure:"SERVER_PORT"`
-}
-
 }
 
 func LoadConfigEnv() error {
