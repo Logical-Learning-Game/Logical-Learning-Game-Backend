@@ -155,6 +155,10 @@ type StateValue struct {
 	BackActionCount       int32 `gorm:"not null"`
 	LeftActionCount       int32 `gorm:"not null"`
 	ConditionActionCount  int32 `gorm:"not null"`
+	AllItemCount          int32 `gorm:"not null"`
+	KeyACount             int32 `gorm:"not null"`
+	KeyBCount             int32 `gorm:"not null"`
+	KeyCCount             int32 `gorm:"not null"`
 }
 
 type SubmitHistoryRule struct {

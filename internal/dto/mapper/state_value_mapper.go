@@ -29,6 +29,10 @@ func (m StateValueMapper) ToDTO(stateValue *entity.StateValue) *dto.StateValueDT
 		BackActionCount:       int(stateValue.BackActionCount),
 		LeftActionCount:       int(stateValue.LeftActionCount),
 		ConditionActionCount:  int(stateValue.ConditionActionCount),
+		AllItemCount:          int(stateValue.AllItemCount),
+		KeyACount:             int(stateValue.KeyACount),
+		KeyBCount:             int(stateValue.KeyBCount),
+		KeyCCount:             int(stateValue.KeyCCount),
 	}
 
 	return stateValueDTO
@@ -52,6 +56,10 @@ func (m StateValueMapper) ToEntity(stateValueDTO *dto.StateValueDTO) *entity.Sta
 		BackActionCount:       int32(stateValueDTO.BackActionCount),
 		LeftActionCount:       int32(stateValueDTO.LeftActionCount),
 		ConditionActionCount:  int32(stateValueDTO.ConditionActionCount),
+		AllItemCount:          int32(stateValueDTO.AllItemCount),
+		KeyACount:             int32(stateValueDTO.KeyACount),
+		KeyBCount:             int32(stateValueDTO.KeyBCount),
+		KeyCCount:             int32(stateValueDTO.KeyCCount),
 	}
 
 	return stateValue

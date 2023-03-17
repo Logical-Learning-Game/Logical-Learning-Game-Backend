@@ -43,6 +43,10 @@ type StateValueDTO struct {
 	BackActionCount       int `json:"back_action_count"`
 	LeftActionCount       int `json:"left_action_count"`
 	ConditionActionCount  int `json:"condition_action_count"`
+	AllItemCount          int `json:"all_item_count"`
+	KeyACount             int `json:"keya_item_count"`
+	KeyBCount             int `json:"keyb_item_count"`
+	KeyCCount             int `json:"keyc_item_count"`
 }
 
 type SubmitHistoryRuleRequest struct {
