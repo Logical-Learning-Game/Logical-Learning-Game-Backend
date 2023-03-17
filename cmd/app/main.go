@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	}
-
 	// Read secret environment variable
 	if err := config.LoadConfigEnv(); err != nil {
 		log.Fatalf("cannot load env config: %v", err.Error())

@@ -15,8 +15,6 @@ type HTTP struct {
 	Port string `mapstructure:"SERVER_PORT"`
 }
 
-}
-
 func LoadConfigEnv() error {
 	var config Config
 
