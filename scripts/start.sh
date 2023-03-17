@@ -5,9 +5,5 @@ set -e
 
 echo "Startup API Service"
 
-./migrate.sh "$DB_SOURCE"
-
 echo "Exec:" "$@"
 exec "$@"
-
-
