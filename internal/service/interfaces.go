@@ -20,6 +20,12 @@ type PlayerStatisticService interface {
 
 type MapConfigurationService interface {
 	ListPlayerAvailableMaps(ctx context.Context, playerID string) ([]*dto.WorldDTO, error)
+
+	ListWorld(ctx context.Context) ([]*dto.WorldForAdminResponse, error)
+	CreateWorld(ctx context.Context, name string) error
+	UpdateWorld(ctx context.Context, worldID int64, name string) error
+	ListWorldWithMap(ctx context.Context) ([]*dto.WorldDTO, error)
+	SetMapActive(ctx context.Context, mapID int64, active bool) error
 }
 
 type PlayerService interface {

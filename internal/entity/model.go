@@ -76,6 +76,7 @@ type MapConfiguration struct {
 	LeastSolvableActionSilver  int32                   `gorm:"not null"`
 	LeastSolvableActionBronze  int32                   `gorm:"not null"`
 	CreatedAt                  time.Time               `gorm:"not null;default:now()"`
+	Active                     bool                    `gorm:"not null;default:true"`
 	Items                      []*MapConfigurationItem `gorm:"foreignKey:MapConfigurationID"`
 	Rules                      []*MapConfigurationRule `gorm:"foreignKey:MapConfigurationID"`
 	Doors                      []*MapConfigurationDoor `gorm:"foreignKey:MapConfigurationID"`

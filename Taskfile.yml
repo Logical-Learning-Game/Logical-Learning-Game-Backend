@@ -25,6 +25,6 @@ tasks:
       - sqlc generate
 
   wire:
-    desc: generate component initializatio code with wire
+    desc: generate component initialization code with wire
     cmds:
       - wire ./...
