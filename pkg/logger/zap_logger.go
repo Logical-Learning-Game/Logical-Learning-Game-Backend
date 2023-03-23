@@ -12,6 +12,30 @@ func NewZapLogger(sugar *zap.SugaredLogger) Logger {
 	}
 }
 
+func (z ZapLogger) Debugf(template string, args ...interface{}) {
+	z.sugar.Debugf(template, args...)
+}
+
+func (z ZapLogger) Errorf(template string, args ...interface{}) {
+	z.sugar.Errorf(template, args...)
+}
+
+func (z ZapLogger) Infof(template string, args ...interface{}) {
+	z.sugar.Infof(template, args...)
+}
+
+func (z ZapLogger) Warnf(template string, args ...interface{}) {
+	z.sugar.Warnf(template, args...)
+}
+
+func (z ZapLogger) Fatalf(template string, args ...interface{}) {
+	z.sugar.Fatalf(template, args...)
+}
+
+func (z ZapLogger) Debug(args ...interface{}) {
+	z.sugar.Debug(args...)
+}
+
 func (z ZapLogger) Debugw(message string, keyAndValues ...interface{}) {
 	z.sugar.Debugw(message, keyAndValues...)
 }

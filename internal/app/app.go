@@ -2,12 +2,11 @@ package app
 
 import (
 	"llg_backend/config"
-	v1 "llg_backend/internal/controller/http/v1"
-	"llg_backend/internal/service"
-	"llg_backend/internal/service/repository/player"
+	"llg_backend/internal/entity"
+	"llg_backend/internal/pkg/postgres"
+	"llg_backend/internal/presentation/controller/http"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
-	"llg_backend/pkg/mariadb"
 	"log"
 	"os"
 	"os/signal"
@@ -26,21 +25,37 @@ func Run(cfg *config.Config) {
 
 	sugar := l.Sugar()
 	zapLogger := logger.NewZapLogger(sugar)
-	logger.SetGlobalLogger(zapLogger)
+
+	globalLogger := l.Sugar()
+	zapGlobalLogger := logger.NewZapLogger(globalLogger)
+	logger.SetGlobalLogger(zapGlobalLogger)
 
 	handler := gin.New()
 
-	conn, err := mariadb.New(cfg.MariaDB.DBSource)
+	db, err := postgres.New(&cfg.Postgres)
 	if err != nil {
-		zapLogger.Fatalw("connect to mariadb failed", "err", err)
+		zapLogger.Fatalw("cannot connect to postgres", "err", err)
 	}
-	defer conn.Close()
 
-	playerRepo := player.New(conn)
-	playerService := service.NewPlayerService(playerRepo)
-	playerServiceWithLog := service.NewPlayerServiceWithLog(playerService, zapLogger)
+	db.AutoMigrate(
+		&entity.User{},
+		&entity.SignInHistory{},
+		&entity.Item{}, &entity.Door{},
+		&entity.Rule{}, &entity.World{},
+		&entity.MapConfiguration{},
+		&entity.MapConfigurationItem{},
+		&entity.MapConfigurationRule{},
+		&entity.MapConfigurationDoor{},
+		&entity.MapConfigurationForPlayer{},
+		&entity.GameSession{},
+		&entity.SubmitHistory{},
+		&entity.StateValue{},
+		&entity.SubmitHistoryRule{},
+		&entity.CommandNode{},
+		&entity.CommandEdge{},
+	)
 
-	v1.NewRouter(handler, cfg, playerServiceWithLog)
+	http.NewRouter(handler, db)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 	httpServer.Start()

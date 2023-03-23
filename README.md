@@ -2,7 +2,7 @@
 ## Application
 - Go
 - Gin
-- Mariadb
+- Postgresql
 - sqlc
 
 ## DevOps

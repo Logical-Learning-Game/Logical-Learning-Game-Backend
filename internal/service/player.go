@@ -2,57 +2,132 @@ package service
 
 import (
 	"context"
-	"llg_backend/internal/service/repository/player"
-	"llg_backend/pkg/logger"
-	"strings"
+	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
+	"llg_backend/internal/dto"
+	"llg_backend/internal/entity"
+
+	"gorm.io/gorm"
 )
 
-type PlayerService interface {
-	CreateOrUpdatePlayer(ctx context.Context, arg player.CreateOrUpdatePlayerParams) error
-	CreateLoginLog(ctx context.Context, playerID string) error
-}
-
 type playerService struct {
-	playerRepo player.Querier
+	db *gorm.DB
 }
 
-func NewPlayerService(playerRepo player.Querier) PlayerService {
+func NewPlayerService(db *gorm.DB) PlayerService {
 	return &playerService{
-		playerRepo: playerRepo,
+		db: db,
 	}
 }
 
-func (s *playerService) CreateOrUpdatePlayer(ctx context.Context, arg player.CreateOrUpdatePlayerParams) error {
-	return s.playerRepo.CreateOrUpdatePlayer(ctx, arg)
-}
+var (
+	defaultMaps = []int64{1, 2, 3, 4, 5, 6, 7}
+)
 
-func (s *playerService) CreateLoginLog(ctx context.Context, playerID string) error {
-	return s.playerRepo.CreateLoginLog(ctx, playerID)
-}
-
-type playerServiceWithLog struct {
-	PlayerService
-
-	log logger.Logger
-}
-
-func NewPlayerServiceWithLog(playerService PlayerService, log logger.Logger) PlayerService {
-	return &playerServiceWithLog{
-		PlayerService: playerService,
-		log:           log,
-	}
-}
-
-func (s *playerServiceWithLog) CreateLoginLog(ctx context.Context, playerID string) error {
-	sanitizedPlayerID := strings.Replace(playerID, "\n", "", -1)
-	sanitizedPlayerID = strings.Replace(sanitizedPlayerID, "\r", "", -1)
-	s.log.Debugw("CreateLoginLog - param", "playerID", sanitizedPlayerID)
-
-	err := s.PlayerService.CreateLoginLog(ctx, playerID)
-	if err != nil {
-		s.log.Errorw("CreateLoginLog error", "err", err)
+func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequest) (*entity.User, error) {
+	user := &entity.User{
+		PlayerID: linkAccountRequestDTO.PlayerID,
+		Email:    linkAccountRequestDTO.Email,
 	}
 
-	s.log.Debugw("CreateLoginLog - return", "err", err)
-	return err
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(user)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		initialDefaultMaps := make([]*entity.MapConfigurationForPlayer, 0, len(defaultMaps))
+		for _, v := range defaultMaps {
+			initialDefaultMaps = append(initialDefaultMaps, &entity.MapConfigurationForPlayer{
+				PlayerID:           linkAccountRequestDTO.PlayerID,
+				MapConfigurationID: v,
+				IsPass:             false,
+			})
+		}
+
+		result = tx.Create(&initialDefaultMaps)
+
+		return result.Error
+	})
+	if txErr != nil {
+		if pgErr, ok := txErr.(*pgconn.PgError); ok {
+			switch pgErr.Code {
+			case "23505":
+				return nil, ErrAccountAlreadyLinked
+			}
+		} else {
+			return nil, txErr
+		}
+	}
+
+	return user, nil
+}
+
+func (s playerService) PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponse, error) {
+	var user entity.User
+
+	result := s.db.WithContext(ctx).
+		Where(&entity.User{PlayerID: playerID}).
+		First(&user)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPlayerNotFound
+		} else {
+			return nil, err
+		}
+	}
+
+	playerInfoResponse := &dto.PlayerInfoResponse{
+		PlayerID: user.PlayerID,
+		Email:    user.Email,
+		Name:     "mockName",
+	}
+
+	return playerInfoResponse, nil
+}
+
+func (s playerService) RemovePlayerData(ctx context.Context, playerID string) error {
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// remove all game session history for this player
+		result := tx.Where(&entity.GameSession{
+			PlayerID: playerID,
+		}).Delete(&entity.GameSession{})
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		// remove all top submit
+		mapForPlayers := tx.Model(&entity.MapConfigurationForPlayer{}).
+			Select("ID").
+			Where(&entity.MapConfigurationForPlayer{
+				PlayerID: playerID,
+			})
+		result = tx.Where("map_configuration_for_player_id IN (?)", mapForPlayers).
+			Delete(&entity.SubmitHistory{})
+
+		return result.Error
+	})
+
+	return txErr
+}
+
+func (s playerService) ListPlayers(ctx context.Context) ([]*dto.PlayerInfoResponse, error) {
+	users := make([]*entity.User, 0)
+
+	result := s.db.WithContext(ctx).
+		Find(&users)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	playerInfoResponses := make([]*dto.PlayerInfoResponse, 0, len(users))
+	for _, v := range users {
+		playerInfoResponses = append(playerInfoResponses, &dto.PlayerInfoResponse{
+			PlayerID: v.PlayerID,
+			Email:    v.Email,
+			Name:     "mockName",
+		})
+	}
+
+	return playerInfoResponses, nil
 }
