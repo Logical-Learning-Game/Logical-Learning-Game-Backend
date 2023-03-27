@@ -63,6 +63,10 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, player
 				BackActionCount:       int32(submitHistoryDTO.StateValue.BackActionCount),
 				LeftActionCount:       int32(submitHistoryDTO.StateValue.LeftActionCount),
 				ConditionActionCount:  int32(submitHistoryDTO.StateValue.ConditionActionCount),
+				AllItemCount:          int32(submitHistoryDTO.StateValue.AllItemCount),
+				KeyACount:             int32(submitHistoryDTO.StateValue.KeyACount),
+				KeyBCount:             int32(submitHistoryDTO.StateValue.KeyBCount),
+				KeyCCount:             int32(submitHistoryDTO.StateValue.KeyCCount),
 			}
 
 			result = tx.Create(stateValue)
