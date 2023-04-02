@@ -61,3 +61,62 @@ type CreateWorldRequest struct {
 type SetMapActiveRequest struct {
 	Active bool `json:"active"`
 }
+
+type CreateMapRequest struct {
+	WorldID                    int64                `json:"world_id"`
+	MapName                    string               `json:"map_name"`
+	Tile                       []int                `json:"tile"`
+	Height                     int                  `json:"height"`
+	Width                      int                  `json:"width"`
+	StartPlayerDirection       entity.MapDirection  `json:"start_player_direction"`
+	StartPlayerPositionX       int                  `json:"start_player_position_x"`
+	StartPlayerPositionY       int                  `json:"start_player_position_y"`
+	GoalPositionX              int                  `json:"goal_position_x"`
+	GoalPositionY              int                  `json:"goal_position_y"`
+	Difficulty                 entity.Difficulty    `json:"difficulty"`
+	StarRequirement            int                  `json:"star_requirement"`
+	LeastSolvableCommandGold   int                  `json:"least_solvable_command_gold"`
+	LeastSolvableCommandSilver int                  `json:"least_solvable_command_silver"`
+	LeastSolvableCommandBronze int                  `json:"least_solvable_command_bronze"`
+	LeastSolvableActionGold    int                  `json:"least_solvable_action_gold"`
+	LeastSolvableActionSilver  int                  `json:"least_solvable_action_silver"`
+	LeastSolvableActionBronze  int                  `json:"least_solvable_action_bronze"`
+	Rules                      []*CreateRuleRequest `json:"rules"`
+}
+
+type CreateRuleRequest struct {
+	RuleName   string           `json:"rule_name"`
+	Theme      entity.RuleTheme `json:"rule_theme"`
+	Parameters []int            `json:"parameters"`
+}
+
+type WorldWithMapForAdminResponse struct {
+	WorldID   int64                          `json:"world_id"`
+	WorldName string                         `json:"world_name"`
+	Maps      []*MapConfigurationForAdminDTO `json:"maps"`
+}
+
+type MapConfigurationForAdminDTO struct {
+	MapID                      int64               `json:"map_id"`
+	WorldID                    int64               `json:"world_id"`
+	MapName                    string              `json:"map_name"`
+	Tile                       []int               `json:"tile"`
+	Height                     int                 `json:"height"`
+	Width                      int                 `json:"width"`
+	StartPlayerDirection       entity.MapDirection `json:"start_player_direction"`
+	StartPlayerPositionX       int                 `json:"start_player_position_x"`
+	StartPlayerPositionY       int                 `json:"start_player_position_y"`
+	GoalPositionX              int                 `json:"goal_position_x"`
+	GoalPositionY              int                 `json:"goal_position_y"`
+	MapImagePath               nullable.NullString `json:"map_image_path"`
+	Difficulty                 entity.Difficulty   `json:"difficulty"`
+	StarRequirement            int                 `json:"star_requirement"`
+	LeastSolvableCommandGold   int                 `json:"least_solvable_command_gold"`
+	LeastSolvableCommandSilver int                 `json:"least_solvable_command_silver"`
+	LeastSolvableCommandBronze int                 `json:"least_solvable_command_bronze"`
+	LeastSolvableActionGold    int                 `json:"least_solvable_action_gold"`
+	LeastSolvableActionSilver  int                 `json:"least_solvable_action_silver"`
+	LeastSolvableActionBronze  int                 `json:"least_solvable_action_bronze"`
+	Rules                      []*RuleDTO          `json:"rules"`
+	Active                     bool                `json:"active"`
+}

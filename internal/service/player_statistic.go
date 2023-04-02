@@ -224,6 +224,10 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				BackActionCount:       int32(topSubmitStateValue.BackActionCount),
 				LeftActionCount:       int32(topSubmitStateValue.LeftActionCount),
 				ConditionActionCount:  int32(topSubmitStateValue.ConditionActionCount),
+				AllItemCount:          int32(topSubmitStateValue.AllItemCount),
+				KeyACount:             int32(topSubmitStateValue.KeyACount),
+				KeyBCount:             int32(topSubmitStateValue.KeyBCount),
+				KeyCCount:             int32(topSubmitStateValue.KeyCCount),
 			}
 
 			result = tx.Create(stateValue)

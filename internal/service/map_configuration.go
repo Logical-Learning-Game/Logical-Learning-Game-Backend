@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"gorm.io/gorm"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
+	"llg_backend/pkg/utility"
 )
 
 type mapConfigurationService struct {
@@ -88,7 +91,7 @@ func (s mapConfigurationService) ListWorld(ctx context.Context) ([]*dto.WorldFor
 	return worldsForAdmin, nil
 }
 
-func (s mapConfigurationService) ListWorldWithMap(ctx context.Context) ([]*dto.WorldDTO, error) {
+func (s mapConfigurationService) ListWorldWithMap(ctx context.Context) ([]*dto.WorldWithMapForAdminResponse, error) {
 	worlds := make([]*entity.World, 0)
 
 	result := s.db.WithContext(ctx).
@@ -103,13 +106,13 @@ func (s mapConfigurationService) ListWorldWithMap(ctx context.Context) ([]*dto.W
 	}
 
 	worldMapper := mapper.NewWorldMapper()
-	worldDTOs := make([]*dto.WorldDTO, 0, len(worlds))
+	worldWithMapResponse := make([]*dto.WorldWithMapForAdminResponse, 0, len(worlds))
 	for _, v := range worlds {
-		w := worldMapper.ToWorldDTO(v)
-		worldDTOs = append(worldDTOs, w)
+		w := worldMapper.ToWorldWithMapForAdminResponse(v)
+		worldWithMapResponse = append(worldWithMapResponse, w)
 	}
 
-	return worldDTOs, nil
+	return worldWithMapResponse, nil
 }
 
 func (s mapConfigurationService) CreateWorld(ctx context.Context, name string) error {
@@ -141,4 +144,164 @@ func (s mapConfigurationService) SetMapActive(ctx context.Context, mapID int64, 
 		Update("active", active)
 
 	return result.Error
+}
+
+func (s mapConfigurationService) GetMapByID(ctx context.Context, mapID int64) (*dto.MapConfigurationForAdminDTO, error) {
+	var mapConfig entity.MapConfiguration
+
+	result := s.db.WithContext(ctx).
+		Where(&entity.MapConfiguration{
+			ID: mapID,
+		}).
+		Preload("Rules").
+		First(&mapConfig)
+	if err := result.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrMapNotFound
+		}
+		return nil, err
+	}
+
+	mapConfigDTOMapper := mapper.NewMapConfigurationMapper()
+	mapConfigForAdminDTO := mapConfigDTOMapper.ToMapConfigurationForAdminDTO(&mapConfig)
+	return mapConfigForAdminDTO, nil
+}
+
+func (s mapConfigurationService) CreateMap(ctx context.Context, createMapRequest *dto.CreateMapRequest, imagePath string) error {
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		mapConfig := &entity.MapConfiguration{
+			WorldID:              createMapRequest.WorldID,
+			ConfigName:           createMapRequest.MapName,
+			Tile:                 utility.IntSliceToPqInt32Array(createMapRequest.Tile),
+			Height:               int32(createMapRequest.Height),
+			Width:                int32(createMapRequest.Width),
+			StartPlayerDirection: createMapRequest.StartPlayerDirection,
+			StartPlayerPosition: entity.Vector2Int{
+				X: int32(createMapRequest.StartPlayerPositionX),
+				Y: int32(createMapRequest.StartPlayerPositionY),
+			},
+			GoalPosition: entity.Vector2Int{
+				X: int32(createMapRequest.GoalPositionX),
+				Y: int32(createMapRequest.GoalPositionY),
+			},
+			MapImagePath: sql.NullString{
+				String: imagePath,
+				Valid:  imagePath != "",
+			},
+			Difficulty:                 createMapRequest.Difficulty,
+			StarRequirement:            int32(createMapRequest.StarRequirement),
+			LeastSolvableCommandGold:   int32(createMapRequest.LeastSolvableCommandGold),
+			LeastSolvableCommandSilver: int32(createMapRequest.LeastSolvableCommandSilver),
+			LeastSolvableCommandBronze: int32(createMapRequest.LeastSolvableCommandBronze),
+			LeastSolvableActionGold:    int32(createMapRequest.LeastSolvableActionGold),
+			LeastSolvableActionSilver:  int32(createMapRequest.LeastSolvableActionSilver),
+			LeastSolvableActionBronze:  int32(createMapRequest.LeastSolvableActionBronze),
+		}
+
+		result := tx.Create(mapConfig)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		rules := make([]*entity.MapConfigurationRule, 0, len(createMapRequest.Rules))
+
+		for _, v := range createMapRequest.Rules {
+			rules = append(rules, &entity.MapConfigurationRule{
+				MapConfigurationID: mapConfig.ID,
+				RuleName:           v.RuleName,
+				Theme:              v.Theme,
+				Parameters:         utility.IntSliceToPqInt32Array(v.Parameters),
+			})
+		}
+
+		result = tx.Create(&rules)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return txErr
+}
+
+func (s mapConfigurationService) UpdateMap(ctx context.Context, mapID int64, createMapRequest *dto.CreateMapRequest, imagePath string) error {
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var oldMap entity.MapConfiguration
+		result := tx.Where(&entity.MapConfiguration{
+			ID: mapID,
+		}).First(&oldMap)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		// if imagePath is empty string then copy old image url to new map entry
+		updateMapImagePath := sql.NullString{
+			String: imagePath,
+			Valid:  true,
+		}
+		if imagePath == "" {
+			if oldMap.MapImagePath.Valid {
+				updateMapImagePath.String = oldMap.MapImagePath.String
+			} else {
+				updateMapImagePath.Valid = false
+			}
+		}
+
+		// do create new map
+		mapConfig := &entity.MapConfiguration{
+			WorldID:              createMapRequest.WorldID,
+			ConfigName:           createMapRequest.MapName,
+			Tile:                 utility.IntSliceToPqInt32Array(createMapRequest.Tile),
+			Height:               int32(createMapRequest.Height),
+			Width:                int32(createMapRequest.Width),
+			StartPlayerDirection: createMapRequest.StartPlayerDirection,
+			StartPlayerPosition: entity.Vector2Int{
+				X: int32(createMapRequest.StartPlayerPositionX),
+				Y: int32(createMapRequest.StartPlayerPositionY),
+			},
+			GoalPosition: entity.Vector2Int{
+				X: int32(createMapRequest.GoalPositionX),
+				Y: int32(createMapRequest.GoalPositionY),
+			},
+			MapImagePath:               updateMapImagePath,
+			Difficulty:                 createMapRequest.Difficulty,
+			StarRequirement:            int32(createMapRequest.StarRequirement),
+			LeastSolvableCommandGold:   int32(createMapRequest.LeastSolvableCommandGold),
+			LeastSolvableCommandSilver: int32(createMapRequest.LeastSolvableCommandSilver),
+			LeastSolvableCommandBronze: int32(createMapRequest.LeastSolvableCommandBronze),
+			LeastSolvableActionGold:    int32(createMapRequest.LeastSolvableActionGold),
+			LeastSolvableActionSilver:  int32(createMapRequest.LeastSolvableActionSilver),
+			LeastSolvableActionBronze:  int32(createMapRequest.LeastSolvableActionBronze),
+		}
+
+		result = tx.Create(mapConfig)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		rules := make([]*entity.MapConfigurationRule, 0, len(createMapRequest.Rules))
+
+		for _, v := range createMapRequest.Rules {
+			rules = append(rules, &entity.MapConfigurationRule{
+				MapConfigurationID: mapConfig.ID,
+				RuleName:           v.RuleName,
+				Theme:              v.Theme,
+				Parameters:         utility.IntSliceToPqInt32Array(v.Parameters),
+			})
+		}
+
+		result = tx.Create(&rules)
+		if err := result.Error; err != nil {
+			return err
+		}
+
+		// disable old map
+		oldMap.Active = false
+		result = tx.Save(&oldMap)
+
+		return result.Error
+	})
+
+	return txErr
 }

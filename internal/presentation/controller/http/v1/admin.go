@@ -1,10 +1,15 @@
 package v1
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/presentation/controller/http/httputil"
 	"llg_backend/internal/service"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -58,8 +63,11 @@ func (c AdminController) initRoutes(handler *gin.RouterGroup) {
 		}
 		mapGroup := h.Group("/maps")
 		{
+			mapGroup.POST("", c.CreateMap)
 			singleMapGroup := mapGroup.Group("/:mapID")
 			{
+				singleMapGroup.GET("", c.GetMapByID)
+				singleMapGroup.PUT("", c.UpdateMap)
 				singleMapGroup.PATCH("/active", c.SetMapActive)
 			}
 		}
@@ -198,6 +206,127 @@ func (c AdminController) SetMapActive(ctx *gin.Context) {
 	}
 
 	if err = c.mapConfigService.SetMapActive(ctx, mapID, setMapActiveRequest.Active); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (c AdminController) GetMapByID(ctx *gin.Context) {
+	mapIDString := ctx.Param("mapID")
+	mapID, err := strconv.ParseInt(mapIDString, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	mapConfigDTO, err := c.mapConfigService.GetMapByID(ctx, mapID)
+	if err != nil {
+		if errors.Is(err, service.ErrMapNotFound) {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, httputil.ErrorResponse(err))
+			return
+		}
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	if mapConfigDTO.MapImagePath.Valid {
+		absoluteImagePath := httputil.AbsoluteImageURL(ctx, mapConfigDTO.MapImagePath.String)
+		mapConfigDTO.MapImagePath.String = absoluteImagePath
+	}
+
+	ctx.JSON(http.StatusOK, mapConfigDTO)
+}
+
+func (c AdminController) CreateMap(ctx *gin.Context) {
+	fileImage, err := ctx.FormFile("image")
+	if err != nil {
+		if !errors.Is(err, http.ErrMissingFile) {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+			return
+		}
+	}
+
+	data, found := ctx.GetPostForm("data")
+	if !found {
+		err = errors.New("data not found in form data")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	// if file is exist then generate name and create file in static
+	imagePathToStoreInDB := ""
+	if fileImage != nil {
+		newImageName := uuid.New().String()
+		extension := filepath.Ext(fileImage.Filename)
+		imagePath := fmt.Sprintf("static/images/%s%s", newImageName, extension)
+		imagePathToStoreInDB = fmt.Sprintf("/%s", imagePath)
+
+		if err = ctx.SaveUploadedFile(fileImage, imagePath); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+			return
+		}
+	}
+
+	var createMapRequest dto.CreateMapRequest
+	if err = json.Unmarshal([]byte(data), &createMapRequest); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	if err = c.mapConfigService.CreateMap(ctx, &createMapRequest, imagePathToStoreInDB); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (c AdminController) UpdateMap(ctx *gin.Context) {
+	mapIDString := ctx.Param("mapID")
+	mapID, err := strconv.ParseInt(mapIDString, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	fileImage, err := ctx.FormFile("image")
+	if err != nil {
+		if !errors.Is(err, http.ErrMissingFile) {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+			return
+		}
+	}
+
+	data, found := ctx.GetPostForm("data")
+	if !found {
+		err = errors.New("data not found in form data")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	// if file is exist then generate name and create file in static
+	imagePathToStoreInDB := ""
+	if fileImage != nil {
+		newImageName := uuid.New().String()
+		extension := filepath.Ext(fileImage.Filename)
+		imagePath := fmt.Sprintf("static/images/%s%s", newImageName, extension)
+		imagePathToStoreInDB = fmt.Sprintf("/%s", imagePath)
+
+		if err = ctx.SaveUploadedFile(fileImage, imagePath); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+			return
+		}
+	}
+
+	var createMapRequest dto.CreateMapRequest
+	if err = json.Unmarshal([]byte(data), &createMapRequest); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	if err = c.mapConfigService.UpdateMap(ctx, mapID, &createMapRequest, imagePathToStoreInDB); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
