@@ -354,7 +354,7 @@ func (c AdminController) UpdatePlayerMapActive(ctx *gin.Context) {
 		return
 	}
 
-	if err = c.mapConfigService.UpdatePlayerMapActive(ctx, playerID, mapID, setMapActiveRequest.Active); err != nil {
+	if err = c.mapConfigService.UpdateMapOfPlayerActive(ctx, playerID, mapID, setMapActiveRequest.Active); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
