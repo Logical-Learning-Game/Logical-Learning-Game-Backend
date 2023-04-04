@@ -114,6 +114,7 @@ type MapConfigurationForPlayer struct {
 	MapConfigurationID int64             `gorm:"not null"`
 	MapConfiguration   *MapConfiguration `gorm:"foreignKey:MapConfigurationID"`
 	IsPass             bool              `gorm:"not null;default:false"`
+	Active             bool              `gorm:"not null;default:true"`
 	TopSubmitHistory   *SubmitHistory    `gorm:"foreignKey:MapConfigurationForPlayerID;constraint:OnDelete:CASCADE"`
 }
 

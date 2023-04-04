@@ -63,6 +63,10 @@ func (s playerStatisticService) CreateSessionHistory(ctx context.Context, player
 				BackActionCount:       int32(submitHistoryDTO.StateValue.BackActionCount),
 				LeftActionCount:       int32(submitHistoryDTO.StateValue.LeftActionCount),
 				ConditionActionCount:  int32(submitHistoryDTO.StateValue.ConditionActionCount),
+				AllItemCount:          int32(submitHistoryDTO.StateValue.AllItemCount),
+				KeyACount:             int32(submitHistoryDTO.StateValue.KeyACount),
+				KeyBCount:             int32(submitHistoryDTO.StateValue.KeyBCount),
+				KeyCCount:             int32(submitHistoryDTO.StateValue.KeyCCount),
 			}
 
 			result = tx.Create(stateValue)
@@ -220,6 +224,10 @@ func (s playerStatisticService) UpdateTopSubmitHistory(ctx context.Context, play
 				BackActionCount:       int32(topSubmitStateValue.BackActionCount),
 				LeftActionCount:       int32(topSubmitStateValue.LeftActionCount),
 				ConditionActionCount:  int32(topSubmitStateValue.ConditionActionCount),
+				AllItemCount:          int32(topSubmitStateValue.AllItemCount),
+				KeyACount:             int32(topSubmitStateValue.KeyACount),
+				KeyBCount:             int32(topSubmitStateValue.KeyBCount),
+				KeyCCount:             int32(topSubmitStateValue.KeyCCount),
 			}
 
 			result = tx.Create(stateValue)
@@ -471,6 +479,7 @@ func (s playerStatisticService) ListMapOfPlayerInfoForAdmin(ctx context.Context,
 			WorldName:        v.MapConfiguration.World.Name,
 			MapID:            v.MapConfigurationID,
 			MapName:          v.MapConfiguration.ConfigName,
+			Active:           v.Active,
 			IsPass:           v.IsPass,
 			TopSubmitHistory: submit,
 		}

@@ -24,8 +24,12 @@ type MapConfigurationService interface {
 	ListWorld(ctx context.Context) ([]*dto.WorldForAdminResponse, error)
 	CreateWorld(ctx context.Context, name string) error
 	UpdateWorld(ctx context.Context, worldID int64, name string) error
-	ListWorldWithMap(ctx context.Context) ([]*dto.WorldDTO, error)
+	ListWorldWithMap(ctx context.Context) ([]*dto.WorldWithMapForAdminResponse, error)
+	UpdatePlayerMapActive(ctx context.Context, playerID string, mapID int64, active bool) error
 	SetMapActive(ctx context.Context, mapID int64, active bool) error
+	GetMapByID(ctx context.Context, mapID int64) (*dto.MapConfigurationForAdminDTO, error)
+	CreateMap(ctx context.Context, createMapRequest *dto.CreateMapRequest, imagePath string) error
+	UpdateMap(ctx context.Context, mapID int64, createMapRequest *dto.CreateMapRequest, imagePath string) error
 }
 
 type PlayerService interface {

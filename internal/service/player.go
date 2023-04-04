@@ -21,7 +21,7 @@ func NewPlayerService(db *gorm.DB) PlayerService {
 }
 
 var (
-	defaultMaps = []int64{1, 2, 3, 4, 5, 6, 7}
+	defaultMaps = []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}
 )
 
 func (s playerService) LinkAccount(ctx context.Context, linkAccountRequestDTO dto.LinkAccountRequest) (*entity.User, error) {
