@@ -44,7 +44,7 @@ func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, pl
 	}
 
 	var worlds []*entity.World
-	result = s.db.Find(&worlds, worldIDs)
+	result = s.db.Order("id ASC").Find(&worlds, worldIDs)
 	if err := result.Error; err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (s mapConfigurationService) ListWorld(ctx context.Context) ([]*dto.WorldFor
 	return worldsForAdmin, nil
 }
 
-func (s mapConfigurationService) UpdatePlayerMapActive(ctx context.Context, playerID string, mapID int64, active bool) error {
+func (s mapConfigurationService) UpdateMapOfPlayerActive(ctx context.Context, playerID string, mapID int64, active bool) error {
 	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// check if player already have this map in their list
 		var mapForPlayer entity.MapConfigurationForPlayer
