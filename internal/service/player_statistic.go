@@ -479,6 +479,7 @@ func (s playerStatisticService) ListMapOfPlayerInfoForAdmin(ctx context.Context,
 			WorldName:        v.MapConfiguration.World.Name,
 			MapID:            v.MapConfigurationID,
 			MapName:          v.MapConfiguration.ConfigName,
+			Active:           v.Active,
 			IsPass:           v.IsPass,
 			TopSubmitHistory: submit,
 		}

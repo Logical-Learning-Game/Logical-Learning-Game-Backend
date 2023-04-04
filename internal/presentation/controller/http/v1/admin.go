@@ -39,6 +39,10 @@ func (c AdminController) initRoutes(handler *gin.RouterGroup) {
 			{
 				singlePlayerMapGroup := singlePlayerGroup.Group("/map")
 				{
+					mapOfPlayerGroup := singlePlayerMapGroup.Group("/:mapID")
+					{
+						mapOfPlayerGroup.PATCH("/active", c.UpdatePlayerMapActive)
+					}
 					singlePlayerMapGroup.GET("/info", c.ListMapOfPlayerInfo)
 				}
 				singlePlayerGroup.GET("/sessions", c.ListPlayerSessions)
@@ -327,6 +331,30 @@ func (c AdminController) UpdateMap(ctx *gin.Context) {
 	}
 
 	if err = c.mapConfigService.UpdateMap(ctx, mapID, &createMapRequest, imagePathToStoreInDB); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (c AdminController) UpdatePlayerMapActive(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	mapIDString := ctx.Param("mapID")
+	mapID, err := strconv.ParseInt(mapIDString, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	var setMapActiveRequest dto.SetMapActiveRequest
+	if err = ctx.ShouldBindJSON(&setMapActiveRequest); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	if err = c.mapConfigService.UpdatePlayerMapActive(ctx, playerID, mapID, setMapActiveRequest.Active); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}

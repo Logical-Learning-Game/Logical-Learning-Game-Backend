@@ -41,6 +41,7 @@ type MapOfPlayerInfoForAdminResponse struct {
 	WorldName        string                         `json:"world_name"`
 	MapID            int64                          `json:"map_id"`
 	MapName          string                         `json:"map_name"`
+	Active           bool                           `json:"active"`
 	IsPass           bool                           `json:"is_pass"`
 	TopSubmitHistory *SubmitHistoryForAdminResponse `json:"top_submit_history"`
 }

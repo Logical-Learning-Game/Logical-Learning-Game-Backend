@@ -26,7 +26,7 @@ func (s mapConfigurationService) ListPlayerAvailableMaps(ctx context.Context, pl
 	result := s.db.WithContext(ctx).
 		Table("map_configurations AS map").
 		Joins("INNER JOIN map_configuration_for_players AS map_player ON map_player.map_configuration_id = map.id").
-		Where("map_player.player_id = ? AND active = true", playerID).
+		Where("map_player.player_id = ? AND map.active = true AND map_player.active = true", playerID).
 		Order("map.id ASC").
 		Preload("Rules").
 		Find(&mapConfigurations)
@@ -89,6 +89,49 @@ func (s mapConfigurationService) ListWorld(ctx context.Context) ([]*dto.WorldFor
 	}
 
 	return worldsForAdmin, nil
+}
+
+func (s mapConfigurationService) UpdatePlayerMapActive(ctx context.Context, playerID string, mapID int64, active bool) error {
+	txErr := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// check if player already have this map in their list
+		var mapForPlayer entity.MapConfigurationForPlayer
+		foundMapForPlayer := true
+		result := tx.Where(&entity.MapConfigurationForPlayer{
+			PlayerID:           playerID,
+			MapConfigurationID: mapID,
+		}).First(&mapForPlayer)
+		if err := result.Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				foundMapForPlayer = false
+			} else {
+				return err
+			}
+		}
+
+		// not found then insert new row of map for player
+		if !foundMapForPlayer {
+			result = tx.Model(&entity.MapConfigurationForPlayer{}).
+				Create(map[string]interface{}{
+					"PlayerID":           playerID,
+					"MapConfigurationID": mapID,
+					"IsPass":             false,
+					"Active":             active,
+				})
+			if err := result.Error; err != nil {
+				return err
+			}
+		} else {
+			mapForPlayer.Active = active
+			result = tx.Save(mapForPlayer)
+			if err := result.Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	return txErr
 }
 
 func (s mapConfigurationService) ListWorldWithMap(ctx context.Context) ([]*dto.WorldWithMapForAdminResponse, error) {
