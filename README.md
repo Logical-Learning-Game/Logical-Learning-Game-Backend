@@ -3,10 +3,8 @@
 - Go
 - Gin
 - Postgresql
-- sqlc
+- Gorm
 
-## DevOps
-- Github
 
 ## Other
 - Taskfile
