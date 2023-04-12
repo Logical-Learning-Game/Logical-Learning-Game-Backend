@@ -80,7 +80,6 @@ func (s playerService) PlayerInfo(ctx context.Context, playerID string) (*dto.Pl
 	playerInfoResponse := &dto.PlayerInfoResponse{
 		PlayerID: user.PlayerID,
 		Email:    user.Email,
-		Name:     "mockName",
 	}
 
 	return playerInfoResponse, nil
@@ -125,7 +124,6 @@ func (s playerService) ListPlayers(ctx context.Context) ([]*dto.PlayerInfoRespon
 		playerInfoResponses = append(playerInfoResponses, &dto.PlayerInfoResponse{
 			PlayerID: v.PlayerID,
 			Email:    v.Email,
-			Name:     "mockName",
 		})
 	}
 
