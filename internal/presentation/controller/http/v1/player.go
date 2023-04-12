@@ -129,6 +129,17 @@ func (c PlayerController) ListTopSubmitHistory(ctx *gin.Context) {
 func (c PlayerController) GetPlayerData(ctx *gin.Context) {
 	playerID := ctx.Param("playerID")
 
+	playerInfo, err := c.playerService.PlayerInfo(ctx, playerID)
+	if err != nil {
+		if errors.Is(err, service.ErrPlayerNotFound) {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, httputil.ErrorResponse(err))
+			return
+		}
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+	
 	playerDataDTO, err := c.statisticService.GetPlayerData(ctx, playerID)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
@@ -136,7 +147,7 @@ func (c PlayerController) GetPlayerData(ctx *gin.Context) {
 	}
 
 	playerDataPresenter := presenter.NewPlayerDataPresenter()
-	formattedPlayerData := playerDataPresenter.Present(playerID, playerDataDTO)
+	formattedPlayerData := playerDataPresenter.Present(playerID, playerInfo.Email, playerDataDTO)
 
 	ctx.JSON(http.StatusOK, formattedPlayerData)
 }

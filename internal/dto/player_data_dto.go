@@ -104,6 +104,7 @@ type PlayerDataDTO struct {
 
 type PlayerDataResponse struct {
 	PlayerID           string                              `json:"player_id"`
+	Email              string                              `json:"email"`
 	SessionHistories   []*SessionHistoryWithStatusResponse `json:"session_histories"`
 	TopSubmitHistories map[int64]*SubmitHistoryResponse    `json:"top_submits"`
 }
@@ -121,5 +122,4 @@ type LinkAccountRequest struct {
 type PlayerInfoResponse struct {
 	PlayerID string `json:"player_id"`
 	Email    string `json:"email"`
-	Name     string `json:"name"`
 }

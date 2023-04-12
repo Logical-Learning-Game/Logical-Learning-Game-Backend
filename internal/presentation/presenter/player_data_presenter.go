@@ -8,7 +8,7 @@ func NewPlayerDataPresenter() PlayerDataPresenter {
 	return PlayerDataPresenter{}
 }
 
-func (p PlayerDataPresenter) Present(playerID string, playerDataDTO *dto.PlayerDataDTO) *dto.PlayerDataResponse {
+func (p PlayerDataPresenter) Present(playerID, email string, playerDataDTO *dto.PlayerDataDTO) *dto.PlayerDataResponse {
 	sessionHistoryWithStatusDTOs := make([]*dto.SessionHistoryWithStatusResponse, 0, len(playerDataDTO.SessionHistories))
 	for _, v := range playerDataDTO.SessionHistories {
 		sessionHistoryWithStatusDTOs = append(sessionHistoryWithStatusDTOs, &dto.SessionHistoryWithStatusResponse{
@@ -24,6 +24,7 @@ func (p PlayerDataPresenter) Present(playerID string, playerDataDTO *dto.PlayerD
 
 	playerDataResponseDTO := &dto.PlayerDataResponse{
 		PlayerID:           playerID,
+		Email:              email,
 		SessionHistories:   sessionHistoryWithStatusDTOs,
 		TopSubmitHistories: topSubmitMap,
 	}
