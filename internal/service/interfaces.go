@@ -4,6 +4,7 @@ import (
 	"context"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/entity"
+	"time"
 )
 
 type PlayerStatisticService interface {
@@ -16,6 +17,7 @@ type PlayerStatisticService interface {
 	ListPlayerSessionForAdmin(ctx context.Context, playerID string) ([]*dto.SessionDataForAdminResponse, error)
 	ListSubmitHistoriesForAdmin(ctx context.Context, sessionID int64) ([]*dto.SubmitHistoryForAdminResponse, error)
 	ListMapOfPlayerInfoForAdmin(ctx context.Context, playerID string) ([]*dto.MapOfPlayerInfoForAdminResponse, error)
+	ListPlayerSignInHistory(ctx context.Context, playerID string) ([]time.Time, error)
 }
 
 type MapConfigurationService interface {
@@ -37,4 +39,8 @@ type PlayerService interface {
 	PlayerInfo(ctx context.Context, playerID string) (*dto.PlayerInfoResponse, error)
 	RemovePlayerData(ctx context.Context, playerID string) error
 	ListPlayers(ctx context.Context) ([]*dto.PlayerInfoResponse, error)
+}
+
+type AdminAuthenticationService interface {
+	Login(ctx context.Context, username, password string) (*dto.AdminLoginResponse, error)
 }
