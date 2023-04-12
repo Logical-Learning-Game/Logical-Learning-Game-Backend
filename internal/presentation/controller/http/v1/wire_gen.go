@@ -9,7 +9,9 @@ package v1
 import (
 	"github.com/google/wire"
 	"gorm.io/gorm"
+	"llg_backend/config"
 	"llg_backend/internal/service"
+	"llg_backend/internal/token"
 )
 
 // Injectors from wire.go:
@@ -30,6 +32,12 @@ func InitializeAdminController(db *gorm.DB) *AdminController {
 	return adminController
 }
 
+func InitializeAdminAuthenticationController(cfg *config.Config, db *gorm.DB, tokenMaker token.Maker) *AdminAuthenticationController {
+	adminAuthenticationService := service.NewAdminAuthenticationService(cfg, db, tokenMaker)
+	adminAuthenticationController := NewAdminAuthenticationController(adminAuthenticationService)
+	return adminAuthenticationController
+}
+
 // wire.go:
 
-var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService, service.NewPlayerService)
+var providerSet = wire.NewSet(service.NewPlayerStatisticService, service.NewMapConfigurationService, service.NewPlayerService, service.NewAdminAuthenticationService)

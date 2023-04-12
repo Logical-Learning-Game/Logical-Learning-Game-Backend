@@ -5,6 +5,7 @@ import (
 	"llg_backend/internal/entity"
 	"llg_backend/internal/pkg/postgres"
 	"llg_backend/internal/presentation/controller/http"
+	"llg_backend/internal/token"
 	"llg_backend/pkg/httpserver"
 	"llg_backend/pkg/logger"
 	"log"
@@ -38,6 +39,7 @@ func Run(cfg *config.Config) {
 	}
 
 	db.AutoMigrate(
+		&entity.Admin{},
 		&entity.User{},
 		&entity.SignInHistory{},
 		&entity.Item{}, &entity.Door{},
@@ -55,7 +57,12 @@ func Run(cfg *config.Config) {
 		&entity.CommandEdge{},
 	)
 
-	http.NewRouter(handler, db)
+	tokenMaker, err := token.NewJWTMaker(cfg.JWT.SecretKey)
+	if err != nil {
+		zapLogger.Fatalw("cannot create token maker", "err", err)
+	}
+
+	http.NewRouter(handler, cfg, db, tokenMaker)
 
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 	httpServer.Start()

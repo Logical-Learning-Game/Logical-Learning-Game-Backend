@@ -24,3 +24,13 @@ func TwoDimensionSlice[T interface{}](oneDimensionSlice []T, height, width int) 
 
 	return result
 }
+
+func ReverseSlice[T interface{}](s []T) {
+	i := 0
+	j := len(s) - 1
+	for i < j {
+		s[i], s[j] = s[j], s[i]
+		i++
+		j--
+	}
+}

@@ -3,16 +3,18 @@
 package v1
 
 import (
-	"llg_backend/internal/service"
-
 	"github.com/google/wire"
 	"gorm.io/gorm"
+	"llg_backend/config"
+	"llg_backend/internal/service"
+	"llg_backend/internal/token"
 )
 
 var providerSet = wire.NewSet(
 	service.NewPlayerStatisticService,
 	service.NewMapConfigurationService,
 	service.NewPlayerService,
+	service.NewAdminAuthenticationService,
 )
 
 func InitializePlayerController(db *gorm.DB) *PlayerController {
@@ -29,4 +31,12 @@ func InitializeAdminController(db *gorm.DB) *AdminController {
 		providerSet,
 	)
 	return &AdminController{}
+}
+
+func InitializeAdminAuthenticationController(cfg *config.Config, db *gorm.DB, tokenMaker token.Maker) *AdminAuthenticationController {
+	wire.Build(
+		NewAdminAuthenticationController,
+		providerSet,
+	)
+	return &AdminAuthenticationController{}
 }

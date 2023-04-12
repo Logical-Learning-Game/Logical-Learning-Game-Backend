@@ -6,6 +6,7 @@ import (
 	"llg_backend/internal/dto"
 	"llg_backend/internal/dto/mapper"
 	"llg_backend/internal/entity"
+	"llg_backend/pkg/utility"
 	"sort"
 	"time"
 
@@ -507,6 +508,33 @@ func (s playerStatisticService) GetPlayerData(ctx context.Context, playerID stri
 	}
 
 	return syncPlayerDataDTO, nil
+}
+
+func (s playerStatisticService) ListPlayerSignInHistory(ctx context.Context, playerID string) ([]time.Time, error) {
+	gameSessions := make([]*entity.GameSession, 0)
+	result := s.db.WithContext(ctx).
+		Where(&entity.GameSession{
+			PlayerID: playerID,
+		}).
+		Order("start_datetime ASC").
+		Find(&gameSessions)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	signInHistories := make([]time.Time, 0)
+	seenDates := make(map[string]struct{})
+	for _, v := range gameSessions {
+		dateStr := v.StartDatetime.Format("2006-01-02")
+		if _, found := seenDates[dateStr]; !found {
+			signInHistories = append(signInHistories, v.StartDatetime)
+		}
+		seenDates[dateStr] = struct{}{}
+	}
+
+	utility.ReverseSlice[time.Time](signInHistories)
+
+	return signInHistories, nil
 }
 
 // compareSubmitHistory will return true if newSubmitHistory is better than oldSubmitHistory otherwise false

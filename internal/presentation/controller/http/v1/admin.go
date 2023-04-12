@@ -7,7 +7,9 @@ import (
 	"github.com/google/uuid"
 	"llg_backend/internal/dto"
 	"llg_backend/internal/presentation/controller/http/httputil"
+	"llg_backend/internal/presentation/controller/http/middleware"
 	"llg_backend/internal/service"
+	"llg_backend/internal/token"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -29,9 +31,11 @@ func NewAdminController(mapConfigService service.MapConfigurationService, statis
 	}
 }
 
-func (c AdminController) initRoutes(handler *gin.RouterGroup) {
+func (c AdminController) initRoutes(handler *gin.RouterGroup, tokenMaker token.Maker) {
 	h := handler.Group("/admin")
 	{
+		h.Use(middleware.AuthenticationMiddleware(tokenMaker))
+
 		multiplePlayerGroup := h.Group("/players")
 		{
 			multiplePlayerGroup.GET("", c.ListPlayers)
@@ -46,6 +50,7 @@ func (c AdminController) initRoutes(handler *gin.RouterGroup) {
 					singlePlayerMapGroup.GET("/info", c.ListMapOfPlayerInfo)
 				}
 				singlePlayerGroup.GET("/sessions", c.ListPlayerSessions)
+				singlePlayerGroup.GET("/sign_in_histories", c.ListPlayerSignInHistory)
 			}
 		}
 		sessionGroup := h.Group("/sessions")
@@ -360,4 +365,16 @@ func (c AdminController) UpdatePlayerMapActive(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func (c AdminController) ListPlayerSignInHistory(ctx *gin.Context) {
+	playerID := ctx.Param("playerID")
+
+	signInHistories, err := c.statisticService.ListPlayerSignInHistory(ctx, playerID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, signInHistories)
 }

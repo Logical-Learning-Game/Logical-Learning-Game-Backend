@@ -1,21 +1,23 @@
 package http
 
 import (
-	"github.com/gin-contrib/cors"
+	"llg_backend/config"
+	"llg_backend/internal/presentation/controller/http/middleware"
 	"llg_backend/internal/presentation/controller/http/v1"
+	"llg_backend/internal/token"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func NewRouter(handler *gin.Engine, db *gorm.DB) {
+func NewRouter(handler *gin.Engine, cfg *config.Config, db *gorm.DB, tokenMaker token.Maker) {
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
-	handler.Use(cors.Default())
-	
+	handler.Use(middleware.CORSMiddleware())
+
 	serverStatusController := NewServerStatusController()
 
 	handler.Static("/static", "./static")
 	serverStatusController.initRoutes(&handler.RouterGroup)
-	v1.NewRouter(&handler.RouterGroup, db)
+	v1.NewRouter(&handler.RouterGroup, cfg, db, tokenMaker)
 }

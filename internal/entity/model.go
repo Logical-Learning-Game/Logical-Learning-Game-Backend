@@ -17,6 +17,11 @@ type Vector2Float32 struct {
 	Y float32 `gorm:"not null"`
 }
 
+type Admin struct {
+	Username       string `gorm:"primaryKey;type:varchar(255)"`
+	HashedPassword string `gorm:"type:varchar(255);not null"`
+}
+
 type User struct {
 	PlayerID          string                       `gorm:"primaryKey;type:varchar(255)"`
 	Email             string                       `gorm:"type:varchar(255)"`
