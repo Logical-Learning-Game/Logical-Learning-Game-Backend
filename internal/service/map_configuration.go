@@ -134,6 +134,42 @@ func (s mapConfigurationService) UpdateMapOfPlayerActive(ctx context.Context, pl
 	return txErr
 }
 
+func (s mapConfigurationService) AddMapToAllPlayers(ctx context.Context, mapID int64) error {
+	players := make([]*entity.User, 0)
+
+	playerWithMapQuery := s.db.Table("map_configuration_for_players").
+		Select("player_id").
+		Where("map_configuration_id = ?", mapID)
+
+	result := s.db.WithContext(ctx).
+		Where("player_id NOT IN (?)", playerWithMapQuery).
+		Find(&players)
+	if err := result.Error; err != nil {
+		return err
+	}
+
+	insertedData := make([]map[string]any, 0, len(players))
+	for _, v := range players {
+		insertedData = append(insertedData, map[string]any{
+			"PlayerID":           v.PlayerID,
+			"MapConfigurationID": mapID,
+			"IsPass":             false,
+			"Active":             true,
+		})
+	}
+
+	if len(insertedData) > 0 {
+		result = s.db.WithContext(ctx).
+			Model(&entity.MapConfigurationForPlayer{}).
+			Create(&insertedData)
+		if err := result.Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s mapConfigurationService) ListWorldWithMap(ctx context.Context) ([]*dto.WorldWithMapForAdminResponse, error) {
 	worlds := make([]*entity.World, 0)
 

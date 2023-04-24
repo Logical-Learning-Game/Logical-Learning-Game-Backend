@@ -32,6 +32,7 @@ type MapConfigurationService interface {
 	GetMapByID(ctx context.Context, mapID int64) (*dto.MapConfigurationForAdminDTO, error)
 	CreateMap(ctx context.Context, createMapRequest *dto.CreateMapRequest, imagePath string) error
 	UpdateMap(ctx context.Context, mapID int64, createMapRequest *dto.CreateMapRequest, imagePath string) error
+	AddMapToAllPlayers(ctx context.Context, mapID int64) error
 }
 
 type PlayerService interface {
