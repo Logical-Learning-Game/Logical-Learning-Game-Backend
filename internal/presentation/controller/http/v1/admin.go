@@ -78,6 +78,7 @@ func (c AdminController) initRoutes(handler *gin.RouterGroup, tokenMaker token.M
 				singleMapGroup.GET("", c.GetMapByID)
 				singleMapGroup.PUT("", c.UpdateMap)
 				singleMapGroup.PATCH("/active", c.SetMapActive)
+				singleMapGroup.POST("/add_to_all_players", c.AddMapToAllPlayers)
 			}
 		}
 	}
@@ -360,6 +361,22 @@ func (c AdminController) UpdatePlayerMapActive(ctx *gin.Context) {
 	}
 
 	if err = c.mapConfigService.UpdateMapOfPlayerActive(ctx, playerID, mapID, setMapActiveRequest.Active); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (c AdminController) AddMapToAllPlayers(ctx *gin.Context) {
+	mapIDString := ctx.Param("mapID")
+	mapID, err := strconv.ParseInt(mapIDString, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, httputil.ErrorResponse(err))
+		return
+	}
+
+	if err = c.mapConfigService.AddMapToAllPlayers(ctx, mapID); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputil.ErrorResponse(err))
 		return
 	}
